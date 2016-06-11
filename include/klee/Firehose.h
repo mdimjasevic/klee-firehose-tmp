@@ -30,7 +30,7 @@ namespace klee {
     private:
       static bool isNonEmpty(const std::string& s) { return s != ""; }
     protected:
-      const std::string mkString(std::vector<std::string> ss,
+      const std::string mkString(std::vector<std::string>& ss,
 				 std::string sep = "\n") const;
     public:
       virtual const std::string toXML() const = 0;

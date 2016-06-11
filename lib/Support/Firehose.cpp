@@ -16,7 +16,7 @@
 using namespace klee::firehose;
 
 
-const std::string XML::mkString(std::vector<std::string> ss,
+const std::string XML::mkString(std::vector<std::string>& ss,
 				std::string sep) const {
   std::vector<std::string> filtered(ss.size());
   std::copy_if(ss.begin(), ss.end(), filtered.begin(), isNonEmpty);
