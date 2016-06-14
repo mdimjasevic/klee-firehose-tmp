@@ -23,12 +23,11 @@
 namespace klee {
   namespace firehose {
 
+    template <typename T> std::string NumberToString(T Number);
     // Dummy string value used for default reference parameter values
     static const std::string dummyString("");
 
     class XML {
-    private:
-      static bool isNonEmpty(const std::string& s) { return s != ""; }
     protected:
       const std::string mkString(std::vector<std::string>& ss,
 				 std::string sep = "\n") const;

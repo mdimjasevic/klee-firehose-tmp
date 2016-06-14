@@ -12,14 +12,24 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 using namespace klee::firehose;
 
 
+template <typename T> std::string numberToString(T Number) {
+  std::ostringstream ss;
+  ss << Number;
+  return ss.str();
+}
+
 const std::string XML::mkString(std::vector<std::string>& ss,
 				std::string sep) const {
   std::vector<std::string> filtered(ss.size());
-  std::copy_if(ss.begin(), ss.end(), filtered.begin(), isNonEmpty);
+  for(std::vector<std::string>::iterator iter = ss.begin();
+      iter != ss.end();
+      ++iter)
+    if (*iter != "") filtered.push_back(*iter);
   
   std::ostringstream os;
   for(unsigned i = 0; i < filtered.size() - 1; ++i)
@@ -44,8 +54,8 @@ Point::Point(const Point& that) {
 
 const std::string Point::toXML() const {
   if (this != &dummyPoint)
-    return std::string("<point column=\"" + std::to_string(this->getColumn()) +
-		       "\" line=\"" + std::to_string(this->getLine())
+    return std::string("<point column=\"" + numberToString(this->getColumn()) +
+		       "\" line=\"" + numberToString(this->getLine())
 		       + "\"/>");
   else return "";
 }
