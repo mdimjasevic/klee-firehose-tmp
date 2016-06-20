@@ -304,8 +304,14 @@ Generator::Generator(const Generator& that):
 const std::string& Generator::getName() const    { return this->m_name; }
 const std::string& Generator::getVersion() const { return this->m_version; }
 
+bool Generator::operator ==(const Generator& that) const {
+  return
+    this->getName() == that.getName() &&
+    this->getVersion() == that.getVersion();
+}
+
 const std::string Generator::toXML() const {
-  if (this != &dummyGenerator)
+  if (!(*this == dummyGenerator))
     return std::string("<generator name=\"" + this->getName() +
 		       "\" version=\"" + this->getVersion() + "\"/>");
   else return "";
@@ -321,8 +327,14 @@ Metadata::Metadata(const Metadata& that): m_generator(that.getGenerator()) {}
 const Generator& Metadata::getGenerator() const { return this->m_generator; }
 // const SUT& Metadata::getSUT() const             { return this->m_sut; }
 
+bool Metadata::operator ==(const Metadata& that) const {
+  return
+    this->getGenerator() == that.getGenerator();
+  // && this->getSUT() == that.getSUT();
+}
+
 const std::string Metadata::toXML() const {
-  if (this != &dummyMetadata) {
+  if (!(*this == dummyMetadata)) {
     std::vector<std::string> r;
     r.push_back("<metadata>");
     r.push_back(this->getGenerator().toXML());
@@ -343,8 +355,14 @@ Analysis::Analysis(const Analysis& that):
 const Metadata& Analysis::getMetadata() const { return this->m_metadata; }
 const Results& Analysis::getResults() const   { return this->m_results; }
 
+bool Analysis::operator ==(const Analysis& that) const {
+  return
+    this->getMetadata() == that.getMetadata() &&
+    this->getResults() == that.getResults();
+}
+
 const std::string Analysis::toXML() const {
-  if (this != &dummyAnalysis) {
+  if (!(*this == dummyAnalysis)) {
     std::vector<std::string> r;
     r.push_back("<analysis>");
     r.push_back(this->getMetadata().toXML());

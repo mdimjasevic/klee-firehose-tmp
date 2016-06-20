@@ -79,6 +79,15 @@ namespace {
   Results results2(results2Vec);
   Results results3(results3Vec);
   
+  Generator gen1("klee", "1.2.0");
+  Generator gen2("clanganalyzer", "n/a");
+
+  Metadata metadata1(gen1);
+  Metadata metadata2(gen2);
+
+  Analysis analysis1(metadata1, results1);
+  Analysis analysis2(metadata1, results2);
+  Analysis analysis3(metadata2, results3);
   
   class XMLMagic: public XML {
   public:
@@ -628,4 +637,154 @@ namespace {
   TEST(ResultsTestDummy, toXML) {
     ASSERT_EQ("", dummyResults.toXML());
   }
+
+
+  // Generator
+  TEST(GeneratorTest, constructor1) {
+    EXPECT_EQ("klee", gen1.getName());
+    EXPECT_EQ("1.2.0", gen1.getVersion());
+    ASSERT_FALSE(gen1 == gen2);
+  }
+
+  TEST(GeneratorTest, constructor2) {
+    EXPECT_EQ("clanganalyzer", gen2.getName());
+    EXPECT_EQ("n/a", gen2.getVersion());
+    ASSERT_FALSE(gen2 == dummyGenerator);
+  }
+
+  TEST(GeneratorTest, copyConstructor1) {
+    Generator a(gen1);
+    EXPECT_EQ(a, gen1);
+  }
+
+  TEST(GeneratorTest, copyConstructor2) {
+    Generator b(gen2);
+    EXPECT_EQ(b, gen2);
+  }
+
+  TEST(GeneratorTest, copyConstructor3) {
+    Generator dg(dummyGenerator);
+    EXPECT_EQ(dg, dummyGenerator);
+  }
+
+  TEST(GeneratorTest, toXML) {
+    std::string xml1 = "<generator name=\"klee\" version=\"1.2.0\"/>";
+    std::string xml2 = "<generator name=\"clanganalyzer\" version=\"n/a\"/>";
+    EXPECT_EQ(xml1, gen1.toXML());
+    EXPECT_EQ(xml2, gen2.toXML());
+  }
+
+  TEST(GeneratorTestDummy, toXML) {
+    EXPECT_EQ("", dummyGenerator.toXML());
+  }
+
+
+  // Metadata
+  TEST(MetadataTest, constructor) {
+    EXPECT_EQ(gen1, metadata1.getGenerator());
+    EXPECT_EQ(gen2, metadata2.getGenerator());
+    // TODO: SUT tests missing here
+    ASSERT_FALSE(metadata1 == metadata2);
+  }
+
+  TEST(MetadataTest, copyConstructor1) {
+    Metadata a(metadata1);
+    EXPECT_EQ(a, metadata1);
+  }
+  
+  TEST(MetadataTest, copyConstructor2) {
+    Metadata b(metadata2);
+    EXPECT_EQ(b, metadata2);
+  }
+  
+  TEST(MetadataTest, copyConstructor3) {
+    Metadata dm(dummyMetadata);
+    EXPECT_EQ(dm, dummyMetadata);
+  }
+
+  const std::string metadataToXML(const Metadata& metadata) {
+    std::ostringstream os;
+
+    os << "<metadata>\n";
+    os << metadata.getGenerator().toXML() + "\n";
+    // os << metadata.getSUT().toXML() + "\n";
+    os << "</metadata>";
+
+    return os.str();
+  }
+  
+  TEST(MetadataTest, toXML) {
+    std::string xml1 = metadata1.toXML();
+    std::string xml2 = metadata2.toXML();
+    EXPECT_EQ(xml1, metadataToXML(metadata1));
+    EXPECT_EQ(xml2, metadataToXML(metadata2));
+  }
+
+  TEST(MetadataTestDummy, toXML) {
+    EXPECT_EQ("", dummyMetadata.toXML());
+  }
+
+
+  // Analysis
+  TEST(AnalysisTest, constructor1) {
+    EXPECT_EQ(metadata1, analysis1.getMetadata());
+    EXPECT_EQ(results1, analysis1.getResults());
+    ASSERT_FALSE(analysis1 == analysis2);
+  }
+  
+  TEST(AnalysisTest, constructor2) {
+    EXPECT_EQ(metadata1, analysis2.getMetadata());
+    EXPECT_EQ(results2, analysis2.getResults());
+    ASSERT_FALSE(analysis3 == analysis2);
+  }
+  
+  TEST(AnalysisTest, constructor3) {
+    EXPECT_EQ(metadata2, analysis3.getMetadata());
+    EXPECT_EQ(results3, analysis3.getResults());
+    ASSERT_FALSE(analysis1 == analysis3);
+  }
+  
+  TEST(AnalysisTest, copyConstructor1) {
+    Analysis a(analysis1);
+    EXPECT_EQ(a, analysis1);
+  }
+  
+  TEST(AnalysisTest, copyConstructor2) {
+    Analysis b(analysis2);
+    EXPECT_EQ(b, analysis2);
+  }
+  
+  TEST(AnalysisTest, copyConstructor3) {
+    Analysis c(analysis3);
+    EXPECT_EQ(c, analysis3);
+  }
+  
+  TEST(AnalysisTest, copyConstructor4) {
+    Analysis da(dummyAnalysis);
+    EXPECT_EQ(da, dummyAnalysis);
+  }
+
+  const std::string analysisToXML(const Analysis& analysis) {
+    std::ostringstream os;
+
+    os << "<analysis>\n";
+    os << analysis.getMetadata().toXML() + "\n";
+    os << analysis.getResults().toXML() + "\n";
+    os << "</analysis>";
+
+    return os.str();
+  }
+  
+  TEST(AnalysisTest, toXML) {
+    std::string xml1 = analysis1.toXML();
+    std::string xml2 = analysis2.toXML();
+    std::string xml3 = analysis3.toXML();
+    EXPECT_EQ(xml1, analysisToXML(analysis1));
+    EXPECT_EQ(xml2, analysisToXML(analysis2));
+    EXPECT_EQ(xml3, analysisToXML(analysis3));
+  }
+
+  TEST(AnalysisTestDummy, toXML) {
+    EXPECT_EQ("", dummyAnalysis.toXML());
+  }  
 }

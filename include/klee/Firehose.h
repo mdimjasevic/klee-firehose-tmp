@@ -212,6 +212,7 @@ namespace klee {
       Generator(const Generator& that);
       const std::string& getName() const;
       const std::string& getVersion() const;
+      bool operator ==(const Generator& that) const;
       const std::string toXML() const;
     };
 
@@ -235,6 +236,7 @@ namespace klee {
       Metadata(const Metadata& that);
       const Generator& getGenerator() const;
       // const SUT& getSUT() const;
+      bool operator ==(const Metadata& that) const;
       const std::string toXML() const;
     };
 
@@ -251,6 +253,7 @@ namespace klee {
       Analysis(const Analysis& that);
       const Metadata& getMetadata() const;
       const Results& getResults() const;
+      bool operator ==(const Analysis& that) const;
       const std::string toXML() const;
     };
 
