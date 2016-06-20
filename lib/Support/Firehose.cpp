@@ -24,8 +24,8 @@ template <typename T> std::string numberToString(T Number) {
 }
 
 const std::string XML::mkString(std::vector<std::string>& ss,
-				std::string sep) const {
-  std::vector<std::string> filtered(ss.size());
+				const std::string& sep) const {
+  std::vector<std::string> filtered;
   for(std::vector<std::string>::iterator iter = ss.begin();
       iter != ss.end();
       ++iter)
@@ -52,6 +52,12 @@ Point::Point(const Point& that) {
   this->m_line = that.getLine();
 }
 
+bool Point::operator ==(const Point& that) const {
+  return
+    this->getColumn() == that.getColumn() &&
+    this->getLine() == that.getLine();
+}
+
 const std::string Point::toXML() const {
   if (this != &dummyPoint)
     return std::string("<point column=\"" + numberToString(this->getColumn()) +
@@ -66,6 +72,12 @@ Range::Range(const Range& that): m_p1(that.getP1()), m_p2(that.getP2()) {}
 
 const Point& Range::getP1() const { return this->m_p1; }
 const Point& Range::getP2() const { return this->m_p2; }
+
+bool Range::operator ==(const Range& that) const {
+  return
+    this->getP1() == that.getP1() &&
+    this->getP2() == that.getP2();
+}
 
 const std::string Range::toXML() const {
   if (this != &dummyRange) {
@@ -87,6 +99,10 @@ File::File(const char* path): m_path(path) {}
 const std::string& File::getPath() const { return this->m_path; }
 
 File::File(const File& that) { this->m_path = that.getPath(); }
+
+bool File::operator ==(const File& that) const {
+  return this->getPath() == that.getPath();
+}
 
 const std::string File::toXML() const {
   if (this != &dummyFile)

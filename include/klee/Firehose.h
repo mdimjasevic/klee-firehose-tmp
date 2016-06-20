@@ -30,7 +30,7 @@ namespace klee {
     class XML {
     protected:
       const std::string mkString(std::vector<std::string>& ss,
-				 std::string sep = "\n") const;
+				 const std::string& sep = "\n") const;
     public:
       virtual const std::string toXML() const = 0;
       XML() {}
@@ -45,6 +45,7 @@ namespace klee {
       Point(const Point& that);
       unsigned getColumn() const;
       unsigned getLine() const;
+      bool operator ==(const Point& that) const;
       const std::string toXML() const;
     };
 
@@ -60,6 +61,7 @@ namespace klee {
       Range(const Range& that);
       const Point& getP1() const;
       const Point& getP2() const;
+      bool operator ==(const Range& that) const;
       const std::string toXML() const;
     };
 
@@ -75,6 +77,7 @@ namespace klee {
       File(const char* path);
       File(const File& that);
       const std::string& getPath() const;
+      bool operator ==(const File& that) const;
       const std::string toXML() const;
     };
 
