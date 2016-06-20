@@ -59,7 +59,7 @@ bool Point::operator ==(const Point& that) const {
 }
 
 const std::string Point::toXML() const {
-  if (this != &dummyPoint)
+  if (!(*this == dummyPoint))
     return std::string("<point column=\"" + numberToString(this->getColumn()) +
 		       "\" line=\"" + numberToString(this->getLine())
 		       + "\"/>");
@@ -80,7 +80,7 @@ bool Range::operator ==(const Range& that) const {
 }
 
 const std::string Range::toXML() const {
-  if (this != &dummyRange) {
+  if (!(*this == dummyRange)) {
     std::vector<std::string> r;
     r.push_back("<range>");
     r.push_back(this->getP1().toXML());
@@ -105,7 +105,7 @@ bool File::operator ==(const File& that) const {
 }
 
 const std::string File::toXML() const {
-  if (this != &dummyFile)
+  if (!(*this == dummyFile))
     return std::string("<file given-path=\"" + this->getPath() + "\"/>");
   else return "";
 }
@@ -119,8 +119,12 @@ const std::string& Function::getName() const { return this->m_name; }
   
 Function::Function(const Function& that): m_name(that.getName()) {}
 
+bool Function::operator ==(const Function& that) const {
+  return this->getName() == that.getName();
+}
+
 const std::string Function::toXML() const {
-  if (this != &dummyFunction)
+  if (!(*this == dummyFunction))
     return std::string("<function name=\"" + this->getName() + "\"/>");
   else return "";
 }
@@ -143,8 +147,16 @@ Location::Location(const Location& that):
   m_file(that.getFile()), m_function(that.getFunction()),
   m_range(that.getRange()), m_point(that.getPoint()) {}
 
+bool Location::operator ==(const Location& that) const {
+  return
+    this->getFile() == that.getFile() &&
+    this->getFunction() == that.getFunction() &&
+    this->getRange() == that.getRange() &&
+    this->getPoint() == that.getPoint();
+}
+
 const std::string Location::toXML() const {
-  if (this != &dummyLocation) {
+  if (!(*this == dummyLocation)) {
     std::vector<std::string> r;
     r.push_back("<location>");
     r.push_back(this->getFile().toXML());
@@ -164,8 +176,12 @@ const Location& State::getLocation() const { return this->m_location; }
 
 State::State(const State& that): m_location(that.getLocation()) {}
 
+bool State::operator ==(const State& that) const {
+  return this->getLocation() == that.getLocation();
+}
+
 const std::string State::toXML() const {
-  if (this != &dummyState) {
+  if (!(*this == dummyState)) {
     std::vector<std::string> r;
     r.push_back("<state>");
     r.push_back(this->getLocation().toXML());
@@ -184,12 +200,16 @@ Trace::Trace(const Trace& that):
 
 const std::vector<State>& Trace::getStates() const { return this->m_states; }
 
+bool Trace::operator ==(const Trace& that) const {
+  return this->getStates() == that.getStates();
+}
+
 const std::string Trace::toXML() const {
-  if (this != &dummyTrace) {
+  if (!(*this == dummyTrace)) {
     std::vector<State> tmp(this->getStates().begin(), this->getStates().end());
     std::vector<std::string> r;
     r.push_back("<trace>");
-    for(std::vector<State>::iterator iter = tmp.begin();
+    for (std::vector<State>::iterator iter = tmp.begin();
 	iter != tmp.end();
 	++iter)
       r.push_back(iter->toXML());
@@ -205,8 +225,12 @@ Message::Message(const Message& that): m_msg(that.get()) {}
 
 const std::string& Message::get() const { return this->m_msg; }
 
+bool Message::operator ==(const Message& that) const {
+  return this->get() == that.get();
+}
+
 const std::string Message::toXML() const {
-  if (this != &dummyMessage)
+  if (!(*this == dummyMessage))
     return std::string("<message>" + this->get() + "</message>");
   else return "";
 }
@@ -224,8 +248,15 @@ const Message& Issue::getMessage() const   { return this->m_message; }
 const Location& Issue::getLocation() const { return this->m_location; }
 const Trace& Issue::getTrace() const       { return this->m_trace; }
 
+bool Issue::operator ==(const Issue& that) const {
+  return
+    this->getMessage() == that.getMessage() &&
+    this->getLocation() == that.getLocation() &&
+    this->getTrace() == that.getTrace();
+}
+
 const std::string Issue::toXML() const {
-  if (this != &dummyIssue) {
+  if (!(*this == dummyIssue)) {
     std::vector<std::string> r;
     r.push_back("<issue>");
     r.push_back(this->getMessage().toXML());
@@ -244,8 +275,12 @@ Results::Results(const Results& that): m_issues(that.getIssues()) {}
 
 const std::vector<Issue>& Results::getIssues() const { return this->m_issues; }
 
+bool Results::operator ==(const Results& that) const {
+  return this->getIssues() == that.getIssues();
+}
+
 const std::string Results::toXML() const {
-  if (this != &dummyResults) {
+  if (!(*this == dummyResults)) {
     std::vector<Issue> tmp(this->getIssues().begin(), this->getIssues().end());
     std::vector<std::string> r;
     r.push_back("<results>");

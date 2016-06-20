@@ -93,6 +93,7 @@ namespace klee {
       Function(const char* name);
       Function(const Function& that);
       const std::string& getName() const;
+      bool operator ==(const Function& that) const;
       const std::string toXML() const;
     };
 
@@ -107,15 +108,15 @@ namespace klee {
       Range m_range;
       Point m_point;
     public:
-      Location(const File& file, const Function& function = dummyFunction,
+      Location(const File& file, const Function& function,
 	       const Range& range = dummyRange);
-      Location(const File& file, const Function& function = dummyFunction,
-	       const Point& point = dummyPoint);
+      Location(const File& file, const Function& function, const Point& point);
       Location(const Location& that);
       const File& getFile() const;
       const Function& getFunction() const;
       const Range& getRange() const;
       const Point& getPoint() const;
+      bool operator ==(const Location& that) const;
       const std::string toXML() const;
     };
 
@@ -130,6 +131,7 @@ namespace klee {
       State(const Location& location);
       State(const State& that);
       const Location& getLocation() const;
+      bool operator ==(const State& that) const;
       const std::string toXML() const;
     };
 
@@ -144,6 +146,7 @@ namespace klee {
       Trace(const std::vector<State>& states);
       Trace(const Trace& that);
       const std::vector<State>& getStates() const;
+      bool operator ==(const Trace& that) const;
       const std::string toXML() const;
     };
 
@@ -158,6 +161,7 @@ namespace klee {
       Message(const std::string& msg);
       Message(const Message& that);
       const std::string& get() const;
+      bool operator ==(const Message& that) const;
       const std::string toXML() const;
     };
 
@@ -177,6 +181,7 @@ namespace klee {
       const Message& getMessage() const;
       const Location& getLocation() const;
       const Trace& getTrace() const;
+      bool operator ==(const Issue& that) const;
       const std::string toXML() const;
     };
 
@@ -191,6 +196,7 @@ namespace klee {
       Results(const std::vector<Issue>& issues);
       Results(const Results& that);
       const std::vector<Issue>& getIssues() const;
+      bool operator ==(const Results& that) const;
       const std::string toXML() const;
     };
 
