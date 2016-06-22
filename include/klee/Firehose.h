@@ -1,3 +1,5 @@
+/* -*- mode: c++; c-basic-offset: 2; -*- */
+
 //===-- Firehose.h ----------------------------------------------*- C++ -*-===//
 //
 //                     The KLEE Symbolic Virtual Machine
