@@ -223,6 +223,8 @@ const std::string Trace::toXML() const {
 
 Message::Message(const std::string& msg): m_msg(msg) {}
 
+Message::Message(const char* msg): m_msg(msg) {}
+
 Message::Message(const Message& that): m_msg(that.get()) {}
 
 const std::string& Message::get() const { return this->m_msg; }

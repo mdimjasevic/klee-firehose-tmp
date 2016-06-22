@@ -161,6 +161,7 @@ namespace klee {
       std::string m_msg;
     public:
       Message(const std::string& msg);
+      Message(const char* msg);
       Message(const Message& that);
       const std::string& get() const;
       bool operator ==(const Message& that) const;

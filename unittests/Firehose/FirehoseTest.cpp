@@ -58,7 +58,7 @@ namespace {
   // Trace trace3(std::vector<State>{state1, state2, state3});
 
   Message msg1("Out of memory");
-  Message msg2("Invalid pointer");
+  Message msg2(std::string("Invalid pointer"));
 
   Issue issue1(msg1, loc1);
   Issue issue2(msg1, loc1, trace1);
