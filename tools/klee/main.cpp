@@ -11,6 +11,7 @@
 
 #include "klee/ExecutionState.h"
 #include "klee/Expr.h"
+#include "klee/Firehose.h"
 #include "klee/Interpreter.h"
 #include "klee/Statistics.h"
 #include "klee/Config/Version.h"
@@ -96,6 +97,10 @@ namespace {
   cl::opt<bool>
   NoOutput("no-output",
            cl::desc("Don't generate test files"));
+
+  cl::opt<bool>
+  FirehoseOutput("firehose-output",
+                 cl::desc("Output results in the Firehose format"));
 
   cl::opt<bool>
   WarnAllExternals("warn-all-externals",
@@ -468,6 +473,18 @@ void KleeHandler::processTestCase(const ExecutionState &state,
       delete f;
     }
 
+    if (FirehoseOutput) {
+      if (errorMessage) {
+	firehose::Message msg(errorMessage);
+	llvm::raw_ostream *f = openTestFile(".xml", id);
+	*f << msg.toXML();
+	delete f;
+      }
+      // else
+      // 	firehose::Message msg(firehose::dummyMessage);
+      
+    }
+    
     if (m_pathWriter) {
       std::vector<unsigned char> concreteBranches;
       m_pathWriter->readStream(m_interpreter->getPathStreamID(state),
