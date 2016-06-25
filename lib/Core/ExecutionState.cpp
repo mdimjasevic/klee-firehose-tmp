@@ -348,6 +348,28 @@ bool ExecutionState::merge(const ExecutionState &b) {
   return true;
 }
 
+std::string ExecutionState::functionArgumentsToString(const StackFrame& sf)
+  const {
+  std::stringstream ss;
+  Function *f = sf.kf->function;
+  unsigned index = 0;
+
+  for (Function::arg_iterator ai = f->arg_begin(), ae = f->arg_end();
+       ai != ae; ++ai) {
+    if (ai!=f->arg_begin()) ss << ", ";
+
+    ss << ai->getName().str();
+    // XXX should go through function
+    ref<Expr> value = sf.locals[sf.kf->getArgRegister(index++)].value;
+    if (isa<ConstantExpr>(value)) {
+      ss << "=";
+      ss << value;
+    }
+  }
+
+  return ss.str();
+}
+
 void ExecutionState::dumpStack(llvm::raw_ostream &out) const {
   unsigned idx = 0;
   const KInstruction *target = prevPC;
@@ -361,20 +383,9 @@ void ExecutionState::dumpStack(llvm::raw_ostream &out) const {
     std::stringstream AssStream;
     AssStream << std::setw(8) << std::setfill('0') << ii.assemblyLine;
     out << AssStream.str();
-    out << " in " << f->getName().str() << " (";
+    out << " in " << f->getName().str();
     // Yawn, we could go up and print varargs if we wanted to.
-    unsigned index = 0;
-    for (Function::arg_iterator ai = f->arg_begin(), ae = f->arg_end();
-         ai != ae; ++ai) {
-      if (ai!=f->arg_begin()) out << ", ";
-
-      out << ai->getName().str();
-      // XXX should go through function
-      ref<Expr> value = sf.locals[sf.kf->getArgRegister(index++)].value; 
-      if (isa<ConstantExpr>(value))
-        out << "=" << value;
-    }
-    out << ")";
+    out << " (" << functionArgumentsToString(sf) << ")";
     if (ii.file != "")
       out << " at " << ii.file << ":" << ii.line;
     out << "\n";
@@ -382,42 +393,29 @@ void ExecutionState::dumpStack(llvm::raw_ostream &out) const {
   }
 }
 
-// The structure of this function is the same as of the dumpStack
-// function
+// The structure of this function is almost identical to that of the
+// dumpStack function
 firehose::Trace ExecutionState::dumpStackInFirehose() const {
 
   std::vector<firehose::State> states;
-  
   const KInstruction *target = prevPC;
+
   for (ExecutionState::stack_ty::const_reverse_iterator
          it = stack.rbegin(), ie = stack.rend();
        it != ie; ++it) {
     const StackFrame &sf = *it;
-    Function *f = sf.kf->function;
     const InstructionInfo &ii = *target->info;
 
-    std::string functionName(f->getName().str());
+    std::string functionName(sf.kf->function->getName().str());
     // Relieve the user of KLEE-specifics
     if (functionName == "__user_main")
       functionName = "main";
     else if (functionName == "__uClibc_main")
       break;
-    
-    unsigned index = 0;
-    std::stringstream ss;
-    for (Function::arg_iterator ai = f->arg_begin(), ae = f->arg_end();
-         ai != ae; ++ai) {
-      if (ai!=f->arg_begin()) ss << ", ";
 
-      ss << ai->getName().str();
-      ref<Expr> value = sf.locals[sf.kf->getArgRegister(index++)].value; 
-      if (isa<ConstantExpr>(value)) {
-        ss << "=";
-	ss << value;
-      }
-    }
+    std::string argsStr = functionArgumentsToString(sf);
     firehose::Notes notes("Call to function: " + functionName +
-			  "(" + ss.str() + ")");
+			  "(" + argsStr + ")");
     firehose::Location loc(firehose::File(ii.file),
 			   firehose::Function(functionName),
 			   firehose::Point(0, ii.line));

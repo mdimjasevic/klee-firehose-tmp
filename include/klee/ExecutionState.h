@@ -73,6 +73,7 @@ private:
 
   std::map<std::string, std::string> fnAliases;
 
+  std::string functionArgumentsToString(const StackFrame& sf) const;
 public:
   // Execution - Control Flow specific
 
