@@ -73,7 +73,7 @@ private:
 
   std::map<std::string, std::string> fnAliases;
 
-  std::string functionArgumentsToString(const StackFrame& sf) const;
+  const std::string functionArgumentsToString(const StackFrame& sf) const;
 public:
   // Execution - Control Flow specific
 
@@ -171,7 +171,7 @@ public:
 
   bool merge(const ExecutionState &b);
   void dumpStack(llvm::raw_ostream &out) const;
-  firehose::Trace dumpStackInFirehose() const;
+  const firehose::Trace dumpStackInFirehose() const;
 };
 }
 

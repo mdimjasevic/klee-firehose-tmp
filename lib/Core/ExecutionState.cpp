@@ -348,7 +348,7 @@ bool ExecutionState::merge(const ExecutionState &b) {
   return true;
 }
 
-std::string ExecutionState::functionArgumentsToString(const StackFrame& sf)
+const std::string ExecutionState::functionArgumentsToString(const StackFrame& sf)
   const {
   std::stringstream ss;
   Function *f = sf.kf->function;
@@ -395,7 +395,7 @@ void ExecutionState::dumpStack(llvm::raw_ostream &out) const {
 
 // The structure of this function is almost identical to that of the
 // dumpStack function
-firehose::Trace ExecutionState::dumpStackInFirehose() const {
+const firehose::Trace ExecutionState::dumpStackInFirehose() const {
 
   std::vector<firehose::State> states;
   const KInstruction *target = prevPC;

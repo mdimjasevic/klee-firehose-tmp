@@ -246,6 +246,8 @@ private:
   int m_argc;
   char **m_argv;
 
+  const std::string programArgumentsToString() const;
+
 public:
   KleeHandler(int argc, char **argv);
   ~KleeHandler();
@@ -362,7 +364,22 @@ KleeHandler::~KleeHandler() {
   fclose(klee_message_file);
   delete m_infoFile;
 }
+ 
+const std::string KleeHandler::programArgumentsToString() const {
+  std::string r("");
 
+  // Skip the program name, i.e. start from argument #1
+  unsigned start = 1;
+  for (unsigned i = start; i < (unsigned) m_argc; ++i) {
+    std::string s(m_argv[i]);
+    if (s[0]=='A' && s[1] && !s[2]) s[1] = '\0';
+    if (i > start + 1) r += " ";
+    r += s;
+  }
+
+  return r;
+}
+ 
 void KleeHandler::setInterpreter(Interpreter *i) {
   m_interpreter = i;
 
@@ -475,9 +492,20 @@ void KleeHandler::processTestCase(const ExecutionState &state,
 
     if (FirehoseOutput) {
       if (errorMessage) {
+	char errorType[256];
+	std::istringstream iss(errorMessage);
+	iss.getline(errorType, 256);
+	
+	firehose::Message msg(std::string(errorType) + "\n" +
+			      "The error occurs when the " +
+			      "program is executed with the following " +
+			      "arguments: " +
+			      programArgumentsToString() + "\n");
 	firehose::Trace trace(state.dumpStackInFirehose());
+	firehose::Issue issue(msg, firehose::dummyLocation, trace);
 	llvm::raw_ostream *f = openTestFile("xml", id);
-	*f << trace.toXML() + "\n";
+	*f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << "\n"
+	   << issue.toXML() << "\n";
 	delete f;
       }
       // else
