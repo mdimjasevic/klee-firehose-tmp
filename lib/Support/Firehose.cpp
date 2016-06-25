@@ -302,14 +302,62 @@ const std::string Issue::toXML() const {
 }
 
 
+Failure::Failure(const std::string& id, const Message& message,
+		 const Location& location):
+  m_id(id), m_message(message), m_location(location) {}
+
+const std::string& Failure::getId() const    { return this->m_id; }
+const Message& Failure::getMessage() const   { return this->m_message; }
+const Location& Failure::getLocation() const { return this->m_location; }
+
+Failure::Failure(const Failure& that):
+  m_id(that.getId()), m_message(that.getMessage()),
+  m_location(that.getLocation()) {}
+
+bool Failure::operator ==(const Failure& that) const {
+  return
+    this->getId() == that.getId() &&
+    this->getMessage() == that.getMessage() &&
+    this->getLocation() == that.getLocation();
+}
+
+const std::string Failure::toXML() const {
+  if (!(*this == dummyFailure)) {
+    std::vector<std::string> r;
+    r.push_back("<failure failure-id=\"" + this->getId() + "\">");
+    r.push_back(this->getLocation().toXML());
+    r.push_back(this->getMessage().toXML());
+    r.push_back("</failure>");
+    return mkString(r);
+  }
+  else
+    return "";
+}
+
 Results::Results(const std::vector<Issue>& issues): m_issues(issues) {}
+// Results::Results(const std::vector<Issue>& issues):
+//   m_issues(issues),
+//   m_failures(std::vector<Failure>()),
+//   m_infos(std::vector<Info>()) {}
+
+// Results::Results(const Results& that):
+//   m_issues(that.getIssues()),
+//   m_failures(that.getFailures()),
+//   m_infos(that.getInfos()) {}
 
 Results::Results(const Results& that): m_issues(that.getIssues()) {}
 
 const std::vector<Issue>& Results::getIssues() const { return this->m_issues; }
+// const std::vector<Failure>& Results::getFailures() const {
+//   return this->m_failures;
+// }
+// const std::vector<Info>& Results::getInfos() const { return this->m_infos; }
 
 bool Results::operator ==(const Results& that) const {
-  return this->getIssues() == that.getIssues();
+  return
+    this->getIssues() == that.getIssues();
+    // this->getFailures() == that.getFailures() &&
+    // this->getInfos() == that.getInfos();
 }
 
 const std::string Results::toXML() const {

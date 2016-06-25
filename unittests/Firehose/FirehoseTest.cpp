@@ -69,6 +69,17 @@ namespace {
   Issue issue2(msg1, loc1, trace1);
   Issue issue3(msg2, loc2, trace3);
 
+  Message failure1Msg(std::string("unable to load symbol(") +
+		      "_ZN4dcpp4Text13systemCharsetE) while " +
+		      "initializing globals.");
+  Message failure2Msg("failed external call: ajStrNew");
+  Location failure2Loc(File(std::string("/tmp/buildd/") +
+			    "embassy-domsearch-0.1.650/src/seqfraggle.c"),
+		       dummyFunction,
+		       Point(0, 119));
+  Failure failure1(std::string("symbol-loading"), failure1Msg, dummyLocation);
+  Failure failure2(std::string("external-call"), failure2Msg, failure2Loc);
+  
   // The ugliness of C++ < 11 - No easy way to construct a complex
   // persistent data structure
   const std::vector<Issue> constructResults3Vec() {
@@ -613,6 +624,59 @@ namespace {
     EXPECT_EQ("", dummyIssue.toXML());
   }
 
+
+  // Failure
+  TEST(FailureTest, constructor1) {
+    EXPECT_EQ(std::string("symbol-loading"), failure1.getId());
+    EXPECT_EQ(failure1Msg, failure1.getMessage());
+    EXPECT_EQ(dummyLocation, failure1.getLocation());
+    ASSERT_FALSE(failure1 == failure2);
+  }
+
+  TEST(FailureTest, constructor2) {
+    EXPECT_EQ(std::string("external-call"), failure2.getId());
+    EXPECT_EQ(failure2Msg, failure2.getMessage());
+    EXPECT_EQ(failure2Loc, failure2.getLocation());
+  }
+
+  TEST(FailureTest, copyConstructor1) {
+    Failure a(failure1);
+    EXPECT_EQ(a, failure1);
+  }
+  
+  TEST(FailureTest, copyConstructor2) {
+    Failure b(failure2);
+    EXPECT_EQ(b, failure2);
+  }
+  
+  TEST(FailureTest, copyConstructor3) {
+    Failure df(dummyFailure);
+    EXPECT_EQ(df, dummyFailure);
+  }
+  
+  const std::string failureToXML(const Failure& failure) {
+    std::stringstream ss;
+
+    ss << "<failure failure-id=\"" + failure.getId() + "\">\n";
+    if (!(failure.getLocation() == dummyLocation))
+      ss << failure.getLocation().toXML() + "\n";
+    ss << failure.getMessage().toXML() + "\n";
+    ss << "</failure>";
+
+    return ss.str();
+  }
+
+  TEST(FailureTest, toXML) {
+    std::string xml1 = failure1.toXML();
+    std::string xml2 = failure2.toXML();
+    EXPECT_EQ(xml1, failureToXML(failure1));
+    EXPECT_EQ(xml2, failureToXML(failure2));
+  }
+
+  TEST(FailureTestDummy, toXML) {
+    EXPECT_EQ("", dummyFailure.toXML());
+  }
+  
 
   // Results
   TEST(ResultsTest, constructor1) {

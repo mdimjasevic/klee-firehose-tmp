@@ -508,9 +508,6 @@ void KleeHandler::processTestCase(const ExecutionState &state,
 	   << issue.toXML() << "\n";
 	delete f;
       }
-      // else
-      // 	firehose::Message msg(firehose::dummyMessage);
-      
     }
     
     if (m_pathWriter) {

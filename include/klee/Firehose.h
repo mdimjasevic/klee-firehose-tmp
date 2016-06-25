@@ -198,7 +198,11 @@ namespace klee {
     static const Trace dummyTrace(std::vector<State>(1, dummyState));
 
 
-    class Issue: public XML {
+    class ResultType: public XML {
+    };
+
+    
+    class Issue: public ResultType {
     private:
       Message m_message;
       Location m_location;
@@ -216,15 +220,57 @@ namespace klee {
 
     // Dummy issue value
     static const Issue dummyIssue(dummyMessage, dummyLocation, dummyTrace);
+
+
+    // Dimjašević: This is not a good design, but I do not want to
+    // deal with object slicing, pointers, and exceptions.
+    class Failure: public ResultType {
+    private:
+      std::string m_id;
+      Message m_message;
+      Location m_location;
+    public:
+      // the only two values you should pass as 'id' are
+      // "symbol-loading" and "external-call"
+      Failure(const std::string& id, const Message& message,
+	      const Location& location = dummyLocation);
+      Failure(const Failure& that);
+      const std::string& getId() const;
+      const Message& getMessage() const;
+      const Location& getLocation() const;
+      bool operator==(const Failure& that) const;
+      const std::string toXML() const;
+    };
+
+    // Dummy failure value
+    static const Failure dummyFailure(dummyString, dummyMessage,
+				      dummyLocation);
+
     
+    class Info: public ResultType {
+    private:
+      
+    public:
+    };
 
     class Results: public XML {
     private:
       std::vector<Issue> m_issues;
+      // std::vector<Failure> m_failures;
+      // std::vector<Info> m_infos;
     public:
       Results(const std::vector<Issue>& issues);
+      // Results(const std::vector<Issue>& issues,
+      // 	      const std::vector<Failure>& failures =
+      // 	      std::vector<Failure>(),
+      // 	      const std::vector<Info>& infos =
+      // 	      std::vector<Info>());
+      // Results(const std::vector<Failure>& failures);
+      // Results(const std::vector<Info>& infos);
       Results(const Results& that);
       const std::vector<Issue>& getIssues() const;
+      // const std::vector<Failure>& getFailures() const;
+      // const std::vector<Info>& getInfos() const;
       bool operator ==(const Results& that) const;
       const std::string toXML() const;
     };
