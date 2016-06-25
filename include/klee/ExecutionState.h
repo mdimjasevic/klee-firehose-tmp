@@ -12,6 +12,7 @@
 
 #include "klee/Constraints.h"
 #include "klee/Expr.h"
+#include "klee/Firehose.h"
 #include "klee/Internal/ADT/TreeStream.h"
 
 // FIXME: We do not want to be exposing these? :(
@@ -169,6 +170,7 @@ public:
 
   bool merge(const ExecutionState &b);
   void dumpStack(llvm::raw_ostream &out) const;
+  firehose::Trace dumpStackInFirehose() const;
 };
 }
 

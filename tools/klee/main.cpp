@@ -475,9 +475,9 @@ void KleeHandler::processTestCase(const ExecutionState &state,
 
     if (FirehoseOutput) {
       if (errorMessage) {
-	firehose::Message msg(errorMessage);
-	llvm::raw_ostream *f = openTestFile(".xml", id);
-	*f << msg.toXML();
+	firehose::Trace trace(state.dumpStackInFirehose());
+	llvm::raw_ostream *f = openTestFile("xml", id);
+	*f << trace.toXML() + "\n";
 	delete f;
       }
       // else

@@ -381,3 +381,51 @@ void ExecutionState::dumpStack(llvm::raw_ostream &out) const {
     target = sf.caller;
   }
 }
+
+// The structure of this function is the same as of the dumpStack
+// function
+firehose::Trace ExecutionState::dumpStackInFirehose() const {
+
+  std::vector<firehose::State> states;
+  
+  const KInstruction *target = prevPC;
+  for (ExecutionState::stack_ty::const_reverse_iterator
+         it = stack.rbegin(), ie = stack.rend();
+       it != ie; ++it) {
+    const StackFrame &sf = *it;
+    Function *f = sf.kf->function;
+    const InstructionInfo &ii = *target->info;
+
+    std::string functionName(f->getName().str());
+    // Relieve the user of KLEE-specifics
+    if (functionName == "__user_main")
+      functionName = "main";
+    else if (functionName == "__uClibc_main")
+      break;
+    
+    unsigned index = 0;
+    std::stringstream ss;
+    for (Function::arg_iterator ai = f->arg_begin(), ae = f->arg_end();
+         ai != ae; ++ai) {
+      if (ai!=f->arg_begin()) ss << ", ";
+
+      ss << ai->getName().str();
+      ref<Expr> value = sf.locals[sf.kf->getArgRegister(index++)].value; 
+      if (isa<ConstantExpr>(value)) {
+        ss << "=";
+	ss << value;
+      }
+    }
+    firehose::Notes notes("Call to function: " + functionName +
+			  "(" + ss.str() + ")");
+    firehose::Location loc(firehose::File(ii.file),
+			   firehose::Function(functionName),
+			   firehose::Point(0, ii.line));
+    states.push_back(firehose::State(loc, notes));
+
+    target = sf.caller;
+  }
+  
+  return firehose::Trace(
+    std::vector<firehose::State>(states.rbegin(), states.rend()));
+}

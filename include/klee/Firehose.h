@@ -71,6 +71,10 @@ namespace klee {
     static const Range dummyRange = Range(dummyPoint, dummyPoint);
 
     
+    // <stats wall-clock-time="5"/>
+    // maybe <failure> that is anologous to issue
+      
+      
     class File: public XML {
     private:
       std::string m_path;
@@ -126,19 +130,57 @@ namespace klee {
     static const Location dummyLocation(dummyFile, dummyFunction, dummyRange);
 
     
+    // An abstract class that is inherited by Message and Notes
+    class Text: public XML {
+    private:
+      std::string m_text;
+    public:
+      Text(const std::string& text);
+      Text(const char* text);
+      const std::string& get() const;
+    };
+    
+    class Message: public Text {
+    public:
+      Message(const std::string& msg);
+      Message(const char* msg);
+      Message(const Message& that);
+      bool operator ==(const Message& that) const;
+      const std::string toXML() const;
+    };
+
+    // Dummy message value
+    static const Message dummyMessage(dummyString);
+
+
+    class Notes: public Text {
+    public:
+      Notes(const std::string& notes);
+      Notes(const char* notes);
+      Notes(const Notes& that);
+      bool operator ==(const Notes& that) const;
+      const std::string toXML() const;
+    };
+    
+    // Dummy notes value
+    static const Notes dummyNotes(dummyString);
+
+
     class State: public XML {
     private:
       Location m_location;
+      Notes m_notes;
     public:
-      State(const Location& location);
+      State(const Location& location, const Notes& notes = dummyNotes);
       State(const State& that);
       const Location& getLocation() const;
+      const Notes& getNotes() const;
       bool operator ==(const State& that) const;
       const std::string toXML() const;
     };
 
     // Dummy location value
-    static const State dummyState(dummyLocation);
+    static const State dummyState(dummyLocation, dummyNotes);
     
 
     class Trace: public XML {
@@ -155,23 +197,7 @@ namespace klee {
     // Dummy trace value
     static const Trace dummyTrace(std::vector<State>(1, dummyState));
 
-    
-    class Message: public XML {
-    private:
-      std::string m_msg;
-    public:
-      Message(const std::string& msg);
-      Message(const char* msg);
-      Message(const Message& that);
-      const std::string& get() const;
-      bool operator ==(const Message& that) const;
-      const std::string toXML() const;
-    };
 
-    // Dummy message value
-    static const Message dummyMessage(dummyString);
-
-    
     class Issue: public XML {
     private:
       Message m_message;
@@ -226,6 +252,12 @@ namespace klee {
     class SUT: public XML {
       // TODO: implement this class and add it to as a member of the
       // Metadata class
+      // Ideally, it should have a <debian-source> tag, as illustrated at:
+      //
+      // https://github.com/fedora-static-analysis/firehose/blob/master/examples/example-debian-source.xml
+      //
+      // However, leave this to Debile, i.e. post-process the report
+      // obtained from KLEE in Debile.
     };
 
 

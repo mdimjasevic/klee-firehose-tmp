@@ -172,14 +172,19 @@ const std::string Location::toXML() const {
 }
 
 
-State::State(const Location& location): m_location(location) {}
+State::State(const Location& location, const Notes& notes):
+  m_location(location), m_notes(notes) {}
 
 const Location& State::getLocation() const { return this->m_location; }
+const Notes& State::getNotes() const       { return this->m_notes; }
 
-State::State(const State& that): m_location(that.getLocation()) {}
+State::State(const State& that):
+  m_location(that.getLocation()), m_notes(that.getNotes()) {}
 
 bool State::operator ==(const State& that) const {
-  return this->getLocation() == that.getLocation();
+  return
+    this->getLocation() == that.getLocation() &&
+    this->getNotes() == that.getNotes();
 }
 
 const std::string State::toXML() const {
@@ -187,6 +192,7 @@ const std::string State::toXML() const {
     std::vector<std::string> r;
     r.push_back("<state>");
     r.push_back(this->getLocation().toXML());
+    r.push_back(this->getNotes().toXML());
     r.push_back("</state>");
     return mkString(r);
   }
@@ -221,13 +227,19 @@ const std::string Trace::toXML() const {
   else return "";
 }
 
-Message::Message(const std::string& msg): m_msg(msg) {}
 
-Message::Message(const char* msg): m_msg(msg) {}
+Text::Text(const std::string& text): m_text(text) {}
 
-Message::Message(const Message& that): m_msg(that.get()) {}
+Text::Text(const char* text): m_text(text) {}
 
-const std::string& Message::get() const { return this->m_msg; }
+const std::string& Text::get() const { return this->m_text; }
+
+
+Message::Message(const std::string& msg): Text(msg) {}
+
+Message::Message(const char* msg): Text(msg) {}
+
+Message::Message(const Message& that): Text(that.get()) {}
 
 bool Message::operator ==(const Message& that) const {
   return this->get() == that.get();
@@ -236,6 +248,23 @@ bool Message::operator ==(const Message& that) const {
 const std::string Message::toXML() const {
   if (!(*this == dummyMessage))
     return std::string("<message>" + this->get() + "</message>");
+  else return "";
+}
+
+
+Notes::Notes(const std::string& notes): Text(notes) {}
+
+Notes::Notes(const char* notes): Text(notes) {}
+
+Notes::Notes(const Notes& that): Text(that.get()) {}
+
+bool Notes::operator ==(const Notes& that) const {
+  return this->get() == that.get();
+}
+
+const std::string Notes::toXML() const {
+  if (!(*this == dummyNotes))
+    return std::string("<notes>" + this->get() + "</notes>");
   else return "";
 }
 

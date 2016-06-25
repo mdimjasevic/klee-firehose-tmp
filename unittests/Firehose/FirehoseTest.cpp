@@ -33,9 +33,17 @@ namespace {
   Location loc2(File("t.c"), Function("error"), Point(42, 3));
   Location loc3(File("Test.c"), Function("Test1"));
 
+  Message msg1("Out of memory");
+  Message msg2(std::string("Invalid pointer"));
+
+  Notes notes1("Function call: f(a=3, b=7)");
+  Notes notes2(std::string("Function call: ") +
+	       loc3.getFunction().getName() +
+	       std::string("(name=22974400)"));
+
   State state1(loc1);
   State state2(loc2);
-  State state3(loc3);
+  State state3(loc3, notes2);
 
   // The ugliness of C++ < 11 - No easy way to construct a complex
   // persistent data structure
@@ -56,9 +64,6 @@ namespace {
   // if KLEE was compiled with the -std=c++11 option, we could
   // construct trace trace3 this way instead:
   // Trace trace3(std::vector<State>{state1, state2, state3});
-
-  Message msg1("Out of memory");
-  Message msg2(std::string("Invalid pointer"));
 
   Issue issue1(msg1, loc1);
   Issue issue2(msg1, loc1, trace1);
@@ -328,19 +333,99 @@ namespace {
   }
 
 
+  // Message
+  TEST(MessageTest, constructor) {
+    EXPECT_EQ("Out of memory", msg1.get());
+    EXPECT_EQ("Invalid pointer", msg2.get());
+  }
+
+  TEST(MessageTest, copyConstructor1) {
+    Message a(msg1);
+    EXPECT_EQ(a, msg1);
+  }
+
+  TEST(MessageTest, copyConstructor2) {
+    Message b(msg2);
+    EXPECT_EQ(b, msg2);
+  }
+
+  TEST(MessageTest, copyConstructor3) {
+    Message dm(dummyMessage);
+    EXPECT_EQ(dm, dummyMessage);
+  }
+
+  const std::string messageToXML(const Message& msg) {
+    return std::string("<message>" + msg.get() + "</message>");
+  }
+  
+  TEST(MessageTest, toXML1) {
+    std::string xml1 = msg1.toXML();
+    std::string xml2 = msg2.toXML();
+    EXPECT_EQ(xml1, messageToXML(msg1));
+    EXPECT_EQ(xml2, messageToXML(msg2));
+  }
+
+  TEST(MessageTestDummy, toXML) {
+    EXPECT_EQ("", dummyMessage.toXML());
+  }
+
+  
+  // Notes
+  TEST(NotesTest, constructor) {
+    EXPECT_EQ("Function call: f(a=3, b=7)", notes1.get());
+    EXPECT_EQ(std::string("Function call: ") +
+	      loc3.getFunction().getName() +
+	      std::string("(name=22974400)"),
+	      notes2.get());
+  }
+
+  TEST(NotesTest, copyConstructor1) {
+    Notes a(notes1);
+    EXPECT_EQ(a, notes1);
+  }
+
+  TEST(NotesTest, copyConstructor2) {
+    Notes b(notes2);
+    EXPECT_EQ(b, notes2);
+  }
+
+  TEST(NotesTest, copyConstructor3) {
+    Notes dm(dummyNotes);
+    EXPECT_EQ(dm, dummyNotes);
+  }
+
+  const std::string notesToXML(const Notes& notes) {
+    return std::string("<notes>" + notes.get() + "</notes>");
+  }
+  
+  TEST(NotesTest, toXML1) {
+    std::string xml1 = notes1.toXML();
+    std::string xml2 = notes2.toXML();
+    EXPECT_EQ(xml1, notesToXML(notes1));
+    EXPECT_EQ(xml2, notesToXML(notes2));
+  }
+
+  TEST(NotesTestDummy, toXML) {
+    EXPECT_EQ("", dummyNotes.toXML());
+  }
+
+  
   // State
   TEST(StateTest, constructor1) {
     EXPECT_EQ(loc1, state1.getLocation());
+    EXPECT_EQ(dummyNotes, state1.getNotes());
     ASSERT_FALSE(state1 == state2);
   }
 
   TEST(StateTest, constructor2) {
     EXPECT_EQ(loc2, state2.getLocation());
+    EXPECT_EQ(dummyNotes, state2.getNotes());
     ASSERT_FALSE(state3 == state2);
   }
 
   TEST(StateTest, constructor3) {
     EXPECT_EQ(loc3, state3.getLocation());
+    EXPECT_EQ(notes2, state3.getNotes());
     ASSERT_FALSE(state1 == state3);
   }
 
@@ -365,9 +450,14 @@ namespace {
   }
 
   const std::string stateToXML(const State& s) {
-    return std::string("<state>\n" +
-		       s.getLocation().toXML() + "\n" +
-		       "</state>");
+    std::ostringstream os;
+
+    os << "<state>\n" << s.getLocation().toXML() + "\n";
+    if (!(s.getNotes() == dummyNotes))
+      os << s.getNotes().toXML() + "\n";
+    os << "</state>";
+
+    return os.str();
   }
   
   TEST(StateTest, toXML) {
@@ -459,43 +549,6 @@ namespace {
   }
 
 
-  // Message
-  TEST(MessageTest, constructor) {
-    EXPECT_EQ("Out of memory", msg1.get());
-    EXPECT_EQ("Invalid pointer", msg2.get());
-  }
-
-  TEST(MessageTest, copyConstructor1) {
-    Message a(msg1);
-    EXPECT_EQ(a, msg1);
-  }
-
-  TEST(MessageTest, copyConstructor2) {
-    Message b(msg2);
-    EXPECT_EQ(b, msg2);
-  }
-
-  TEST(MessageTest, copyConstructor3) {
-    Message dm(dummyMessage);
-    EXPECT_EQ(dm, dummyMessage);
-  }
-
-  const std::string messageToXML(const Message& msg) {
-    return std::string("<message>" + msg.get() + "</message>");
-  }
-  
-  TEST(MessageTest, toXML1) {
-    std::string xml1 = msg1.toXML();
-    std::string xml2 = msg2.toXML();
-    EXPECT_EQ(xml1, messageToXML(msg1));
-    EXPECT_EQ(xml2, messageToXML(msg2));
-  }
-
-  TEST(MessageTestDummy, toXML) {
-    EXPECT_EQ("", dummyMessage.toXML());
-  }
-
-  
   // Issue
   TEST(IssueTest, constructor1) {
     EXPECT_EQ(msg1, issue1.getMessage());
