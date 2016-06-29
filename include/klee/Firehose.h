@@ -199,10 +199,13 @@ namespace klee {
 
 
     class ResultType: public XML {
+    public:
+      ResultType() {}
     };
 
     
     class Issue: public ResultType {
+    // class Issue: public XML {
     private:
       Message m_message;
       Location m_location;
@@ -224,19 +227,29 @@ namespace klee {
 
     // Dimjašević: This is not a good design, but I do not want to
     // deal with object slicing, pointers, and exceptions.
-    class Failure: public ResultType {
-    private:
+    class FailureOrInfo: public ResultType {
+    protected:
       std::string m_id;
       Message m_message;
       Location m_location;
     public:
       // the only two values you should pass as 'id' are
       // "symbol-loading" and "external-call"
+      FailureOrInfo(const std::string& id,
+		    const Message& message,
+		    const Location& location = dummyLocation);
+      const std::string& getId() const;
+      const Message& getMessage() const;
+    };
+
+    
+    class Failure: public FailureOrInfo {
+    public:
+      // the only two values you should pass as 'id' are
+      // "symbol-loading" and "external-call"
       Failure(const std::string& id, const Message& message,
 	      const Location& location = dummyLocation);
       Failure(const Failure& that);
-      const std::string& getId() const;
-      const Message& getMessage() const;
       const Location& getLocation() const;
       bool operator==(const Failure& that) const;
       const std::string toXML() const;
@@ -246,12 +259,18 @@ namespace klee {
     static const Failure dummyFailure(dummyString, dummyMessage,
 				      dummyLocation);
 
-    
-    class Info: public ResultType {
-    private:
-      
+
+    class Info: public FailureOrInfo {
     public:
+      Info(const std::string& id, const Message& message);
+      Info(const Info& that);
+      bool operator==(const Info& that) const;
+      const std::string toXML() const;
     };
+
+    // Dummy info value
+    static const Info dummyInfo(dummyString, dummyMessage);
+    
 
     class Results: public XML {
     private:

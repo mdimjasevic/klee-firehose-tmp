@@ -302,17 +302,22 @@ const std::string Issue::toXML() const {
 }
 
 
-Failure::Failure(const std::string& id, const Message& message,
-		 const Location& location):
+FailureOrInfo::FailureOrInfo(const std::string& id, const Message& message,
+			     const Location& location):
   m_id(id), m_message(message), m_location(location) {}
 
-const std::string& Failure::getId() const    { return this->m_id; }
-const Message& Failure::getMessage() const   { return this->m_message; }
+const std::string& FailureOrInfo::getId() const  { return this->m_id; }
+const Message& FailureOrInfo::getMessage() const { return this->m_message; }
+
+
+Failure::Failure(const std::string& id, const Message& message,
+		 const Location& location):
+  FailureOrInfo(id, message, location) {}
+
 const Location& Failure::getLocation() const { return this->m_location; }
 
 Failure::Failure(const Failure& that):
-  m_id(that.getId()), m_message(that.getMessage()),
-  m_location(that.getLocation()) {}
+  FailureOrInfo(that.getId(), that.getMessage(), that.getLocation()) {}
 
 bool Failure::operator ==(const Failure& that) const {
   return
@@ -333,6 +338,31 @@ const std::string Failure::toXML() const {
   else
     return "";
 }
+
+Info::Info(const std::string& id, const Message& message):
+  FailureOrInfo(id, message, dummyLocation) {}
+
+Info::Info(const Info& that):
+  FailureOrInfo(that.getId(), that.getMessage(), dummyLocation) {}
+
+bool Info::operator ==(const Info& that) const {
+  return
+    this->getId() == that.getId() &&
+    this->getMessage() == that.getMessage();
+}
+
+const std::string Info::toXML() const {
+  if (!(*this == dummyInfo)) {
+    std::vector<std::string> r;
+    r.push_back("<info info-id=\"" + this->getId() + "\">");
+    r.push_back(this->getMessage().toXML());
+    r.push_back("</info>");
+    return mkString(r);
+  }
+  else
+    return "";
+}
+
 
 Results::Results(const std::vector<Issue>& issues): m_issues(issues) {}
 // Results::Results(const std::vector<Issue>& issues):

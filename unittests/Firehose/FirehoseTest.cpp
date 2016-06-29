@@ -69,16 +69,37 @@ namespace {
   Issue issue2(msg1, loc1, trace1);
   Issue issue3(msg2, loc2, trace3);
 
-  Message failure1Msg(std::string("unable to load symbol(") +
-		      "_ZN4dcpp4Text13systemCharsetE) while " +
-		      "initializing globals.");
-  Message failure2Msg("failed external call: ajStrNew");
-  Location failure2Loc(File(std::string("/tmp/buildd/") +
-			    "embassy-domsearch-0.1.650/src/seqfraggle.c"),
-		       dummyFunction,
-		       Point(0, 119));
-  Failure failure1(std::string("symbol-loading"), failure1Msg, dummyLocation);
-  Failure failure2(std::string("external-call"), failure2Msg, failure2Loc);
+  // Message failure1Msg(std::string("unable to load symbol(") +
+  // 		      std::string("_ZN4dcpp4Text13systemCharsetE) while ") +
+  // 		      std::string("initializing globals."));
+  // Message failure2Msg("failed external call: ajStrNew");
+  // Location failure2Loc(File(std::string("/tmp/buildd/embassy-domsearch-") +
+  // 			    std::string("0.1.650/src/seqfraggle.c")),
+  // 		       dummyFunction,
+  // 		       Point(0, 119));
+  // Failure failure1(std::string("symbol-loading"), failure1Msg, dummyLocation);
+  // Failure failure2(std::string("external-call"), failure2Msg, failure2Loc);
+
+  // Message info1Msg("WARNING: undefined reference to function: _ZN4QUrlD1Ev");
+  // Message info2Msg("WARNING ONCE: function \"socket\" has inline asm");
+  // Message info3Msg("calling external: ev_default_loop(0)");
+  // Message info4Msg("undefined reference to variable: acs_map");
+  // Message info5Msg("calling __user_main with extra arguments.");
+  // Message info6Msg("Large alloc: 13113808 bytes.  KLEE may run out of memory.");
+  // Message info7Msg("__syscall_rt_sigaction: silently ignoring");
+  // Message info8Msg("execve: ignoring (EACCES)");
+  // Message info9Msg("executable has module level assembly (ignoring)");
+  // Message info10Msg("unable to write output test case, losing it");
+  // Info info1(std::string("undefined-function-reference"), info1Msg);
+  // info info2(std::string("inline-asm"), info2Msg);
+  // Info info3(std::string("calling-external"), info3Msg);
+  // Info info4(std::string("undefined-variable-reference"), info4Msg);
+  // Info info5(std::string("calling-user-main"), info5Msg);
+  // Info info6(std::string("large-alloc"), info6Msg);
+  // Info info7(std::string("silently-ignoring"), info7Msg);
+  // Info info8(std::string("execve"), info8Msg);
+  // Info info9(std::string("module-level-assembly"), info9Msg);
+  // Info info10(std::string("other-info"), info10Msg);
   
   // The ugliness of C++ < 11 - No easy way to construct a complex
   // persistent data structure
@@ -626,56 +647,82 @@ namespace {
 
 
   // Failure
-  TEST(FailureTest, constructor1) {
-    EXPECT_EQ(std::string("symbol-loading"), failure1.getId());
-    EXPECT_EQ(failure1Msg, failure1.getMessage());
-    EXPECT_EQ(dummyLocation, failure1.getLocation());
-    ASSERT_FALSE(failure1 == failure2);
-  }
+  // TEST(FailureTest, constructor1) {
+  //   EXPECT_EQ(std::string("symbol-loading"), failure1.getId());
+  //   EXPECT_EQ(failure1Msg, failure1.getMessage());
+  //   EXPECT_EQ(dummyLocation, failure1.getLocation());
+  //   ASSERT_FALSE(failure1 == failure2);
+  // }
 
-  TEST(FailureTest, constructor2) {
-    EXPECT_EQ(std::string("external-call"), failure2.getId());
-    EXPECT_EQ(failure2Msg, failure2.getMessage());
-    EXPECT_EQ(failure2Loc, failure2.getLocation());
-  }
+  // TEST(FailureTest, constructor2) {
+  //   EXPECT_EQ(std::string("external-call"), failure2.getId());
+  //   EXPECT_EQ(failure2Msg, failure2.getMessage());
+  //   EXPECT_EQ(failure2Loc, failure2.getLocation());
+  // }
 
-  TEST(FailureTest, copyConstructor1) {
-    Failure a(failure1);
-    EXPECT_EQ(a, failure1);
-  }
+  // TEST(FailureTest, copyConstructor1) {
+  //   Failure a(failure1);
+  //   EXPECT_EQ(a, failure1);
+  // }
   
-  TEST(FailureTest, copyConstructor2) {
-    Failure b(failure2);
-    EXPECT_EQ(b, failure2);
-  }
+  // TEST(FailureTest, copyConstructor2) {
+  //   Failure b(failure2);
+  //   EXPECT_EQ(b, failure2);
+  // }
   
-  TEST(FailureTest, copyConstructor3) {
-    Failure df(dummyFailure);
-    EXPECT_EQ(df, dummyFailure);
-  }
+  // TEST(FailureTest, copyConstructor3) {
+  //   Failure df(dummyFailure);
+  //   EXPECT_EQ(df, dummyFailure);
+  // }
   
-  const std::string failureToXML(const Failure& failure) {
-    std::stringstream ss;
+  // const std::string failureToXML(const Failure& failure) {
+  //   std::stringstream ss;
 
-    ss << "<failure failure-id=\"" + failure.getId() + "\">\n";
-    if (!(failure.getLocation() == dummyLocation))
-      ss << failure.getLocation().toXML() + "\n";
-    ss << failure.getMessage().toXML() + "\n";
-    ss << "</failure>";
+  //   ss << "<failure failure-id=\"" + failure.getId() + "\">\n";
+  //   if (!(failure.getLocation() == dummyLocation))
+  //     ss << failure.getLocation().toXML() + "\n";
+  //   ss << failure.getMessage().toXML() + "\n";
+  //   ss << "</failure>";
 
-    return ss.str();
+  //   return ss.str();
+  // }
+
+  // TEST(FailureTest, toXML) {
+  //   std::string xml1 = failure1.toXML();
+  //   std::string xml2 = failure2.toXML();
+  //   EXPECT_EQ(xml1, failureToXML(failure1));
+  //   EXPECT_EQ(xml2, failureToXML(failure2));
+  // }
+
+  // TEST(FailureTestDummy, toXML) {
+  //   EXPECT_EQ("", dummyFailure.toXML());
+  // }
+  
+
+  // Info
+  TEST(InfoTest, constructor) {
+    // EXPECT_EQ(info1Msg, info1.getMessage());
+    // EXPECT_EQ(info2Msg, info2.getMessage());
+    // EXPECT_EQ(info3Msg, info3.getMessage());
+    // EXPECT_EQ(info4Msg, info4.getMessage());
+    // EXPECT_EQ(info5Msg, info5.getMessage());
+    // EXPECT_EQ(info6Msg, info6.getMessage());
+    // EXPECT_EQ(info7Msg, info7.getMessage());
+    // EXPECT_EQ(info8Msg, info8.getMessage());
+    // EXPECT_EQ(info9Msg, info9.getMessage());
+    // EXPECT_EQ(info10Msg, info10.getMessage());
+    // EXPECT_EQ(std::string("undefined-function-reference"), info1.getId());
+    // EXPECT_EQ(std::string("inline-asm"), info2.getId());
+    // EXPECT_EQ(std::string("calling-external"), info3.getId());
+    // EXPECT_EQ(std::string("undefined-variable-reference"), info4.getId());
+    // EXPECT_EQ(std::string("calling-user-main"), info5.getId());
+    // EXPECT_EQ(std::string("large-alloc"), info6.getId());
+    // EXPECT_EQ(std::string("silently-ignoring"), info7.getId());
+    // EXPECT_EQ(std::string("execve"), info8.getId());
+    // EXPECT_EQ(std::string("module-level-assembly"), info9.getId());
+    // EXPECT_EQ(std::string("other-info"), info10.getId());
   }
 
-  TEST(FailureTest, toXML) {
-    std::string xml1 = failure1.toXML();
-    std::string xml2 = failure2.toXML();
-    EXPECT_EQ(xml1, failureToXML(failure1));
-    EXPECT_EQ(xml2, failureToXML(failure2));
-  }
-
-  TEST(FailureTestDummy, toXML) {
-    EXPECT_EQ("", dummyFailure.toXML());
-  }
   
 
   // Results
