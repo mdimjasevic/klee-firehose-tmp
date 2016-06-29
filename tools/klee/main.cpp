@@ -11,7 +11,7 @@
 
 #include "klee/ExecutionState.h"
 #include "klee/Expr.h"
-#include "klee/Firehose.h"
+// #include "klee/Firehose.h"
 #include "klee/Interpreter.h"
 #include "klee/Statistics.h"
 #include "klee/Config/Version.h"
@@ -98,9 +98,9 @@ namespace {
   NoOutput("no-output",
            cl::desc("Don't generate test files"));
 
-  cl::opt<bool>
-  FirehoseOutput("firehose-output",
-                 cl::desc("Output results in the Firehose format"));
+  // cl::opt<bool>
+  // FirehoseOutput("firehose-output",
+  //                cl::desc("Output results in the Firehose format"));
 
   cl::opt<bool>
   WarnAllExternals("warn-all-externals",
@@ -492,25 +492,25 @@ void KleeHandler::processTestCase(const ExecutionState &state,
       delete f;
     }
 
-    if (FirehoseOutput) {
-      if (errorMessage) {
-	char errorType[256];
-	std::istringstream iss(errorMessage);
-	iss.getline(errorType, 256);
+    // if (FirehoseOutput) {
+    //   if (errorMessage) {
+    // 	char errorType[256];
+    // 	std::istringstream iss(errorMessage);
+    // 	iss.getline(errorType, 256);
 	
-	firehose::Message msg(std::string(errorType) + "\n" +
-			      "The error occurs when the " +
-			      "program is executed with the following " +
-			      "arguments: " +
-			      programArgumentsToString() + "\n");
-	firehose::Trace trace(state.dumpStackInFirehose());
-	firehose::Issue issue(msg, firehose::dummyLocation, trace);
-	llvm::raw_ostream *f = openTestFile("xml", id);
-	*f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << "\n"
-	   << issue.toXML() << "\n";
-	delete f;
-      }
-    }
+    // 	firehose::Message msg(std::string(errorType) + "\n" +
+    // 			      "The error occurs when the " +
+    // 			      "program is executed with the following " +
+    // 			      "arguments: " +
+    // 			      programArgumentsToString() + "\n");
+    // 	firehose::Trace trace(state.dumpStackInFirehose());
+    // 	firehose::Issue issue(msg, firehose::dummyLocation, trace);
+    // 	llvm::raw_ostream *f = openTestFile("xml", id);
+    // 	*f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << "\n"
+    // 	   << issue.toXML() << "\n";
+    // 	delete f;
+    //   }
+    // }
     
     if (m_pathWriter) {
       std::vector<unsigned char> concreteBranches;

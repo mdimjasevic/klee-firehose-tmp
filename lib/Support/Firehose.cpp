@@ -340,10 +340,10 @@ const std::string Failure::toXML() const {
 }
 
 Info::Info(const std::string& id, const Message& message):
-  FailureOrInfo(id, message, dummyLocation) {}
+  FailureOrInfo(id, message) {}
 
 Info::Info(const Info& that):
-  FailureOrInfo(that.getId(), that.getMessage(), dummyLocation) {}
+  FailureOrInfo(that.getId(), that.getMessage()) {}
 
 bool Info::operator ==(const Info& that) const {
   return
