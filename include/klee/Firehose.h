@@ -52,7 +52,7 @@ namespace klee {
     };
 
     // Dummy point value
-    static const Point dummyPoint = Point(0, 0);
+    static const Point dummyPoint(0, 0);
 
     
     class Range: public XML {
@@ -68,7 +68,7 @@ namespace klee {
     };
 
     // Dummy range value
-    static const Range dummyRange = Range(dummyPoint, dummyPoint);
+    static const Range dummyRange(dummyPoint, dummyPoint);
 
     
     // <stats wall-clock-time="5"/>
