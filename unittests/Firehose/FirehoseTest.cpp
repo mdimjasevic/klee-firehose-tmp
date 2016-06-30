@@ -734,7 +734,27 @@ namespace {
     EXPECT_EQ(d, dummyInfo());
   }
   
+  const std::string infoToXML(const Info& info) {
+    std::stringstream ss;
 
+    ss << "<info info-id=\"" + info.getId() + "\">\n";
+    ss << info.getMessage().toXML() + "\n";
+    ss << "</info>";
+
+    return ss.str();
+  }
+
+  TEST(InfoTest, toXML) {
+    std::string xml3 = info3.toXML();
+    std::string xml4 = info4.toXML();
+    std::string xml5 = info5.toXML();
+    EXPECT_EQ(xml3, infoToXML(info3));
+    EXPECT_EQ(xml4, infoToXML(info4));
+    EXPECT_EQ(xml5, infoToXML(info5));
+    EXPECT_EQ("", dummyInfo().toXML());
+  }
+  
+  
   // Results
   TEST(ResultsTest, constructor1) {
     EXPECT_EQ(results1Vec, results1.getIssues());
