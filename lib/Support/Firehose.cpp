@@ -364,41 +364,61 @@ const std::string Info::toXML() const {
 }
 
 
-Results::Results(const std::vector<Issue>& issues): m_issues(issues) {}
-// Results::Results(const std::vector<Issue>& issues):
-//   m_issues(issues),
-//   m_failures(std::vector<Failure>()),
-//   m_infos(std::vector<Info>()) {}
+Results::Results() {}
 
-// Results::Results(const Results& that):
-//   m_issues(that.getIssues()),
-//   m_failures(that.getFailures()),
-//   m_infos(that.getInfos()) {}
+Results::Results(const std::vector<Issue>& issues,
+		 const std::vector<Failure>& failures,
+		 const std::vector<Info>& infos):
+  m_issues(issues), m_failures(failures), m_infos(infos) {}
 
-Results::Results(const Results& that): m_issues(that.getIssues()) {}
+Results::Results(const std::vector<Failure>& failures):
+  m_failures(failures) {}
+
+Results::Results(const std::vector<Info>& infos):
+  m_infos(infos) {}
+
+Results::Results(const Results& that):
+  m_issues(that.getIssues()),
+  m_failures(that.getFailures()),
+  m_infos(that.getInfos()) {}
 
 const std::vector<Issue>& Results::getIssues() const { return this->m_issues; }
-// const std::vector<Failure>& Results::getFailures() const {
-//   return this->m_failures;
-// }
-// const std::vector<Info>& Results::getInfos() const { return this->m_infos; }
+const std::vector<Failure>& Results::getFailures() const {
+  return this->m_failures;
+}
+const std::vector<Info>& Results::getInfos() const { return this->m_infos; }
 
 bool Results::operator ==(const Results& that) const {
   return
-    this->getIssues() == that.getIssues();
-    // this->getFailures() == that.getFailures() &&
-    // this->getInfos() == that.getInfos();
+    this->getIssues() == that.getIssues() &&
+    this->getFailures() == that.getFailures() &&
+    this->getInfos() == that.getInfos();
 }
 
 const std::string Results::toXML() const {
   if (!(*this == dummyResults())) {
-    std::vector<Issue> tmp(this->getIssues().begin(), this->getIssues().end());
     std::vector<std::string> r;
     r.push_back("<results>");
-    for(std::vector<Issue>::iterator iter = tmp.begin();
-	iter != tmp.end();
-	++iter)
-      r.push_back(iter->toXML());
+
+    // failures first
+    for(std::vector<Failure>::const_iterator
+	  i = this->getFailures().begin(),
+	  e = this->getFailures().end();
+	i != e; ++i)
+      r.push_back(i->toXML());
+    // then issues
+    for(std::vector<Issue>::const_iterator
+	  i = this->getIssues().begin(),
+	  e = this->getIssues().end();
+	i != e; ++i)
+      r.push_back(i->toXML());
+    // and then infos
+    for(std::vector<Info>::const_iterator
+	  i = this->getInfos().begin(),
+	  e = this->getInfos().end();
+	i != e; ++i)
+      r.push_back(i->toXML());
+    
     r.push_back("</results>");
     return mkString(r);
   }

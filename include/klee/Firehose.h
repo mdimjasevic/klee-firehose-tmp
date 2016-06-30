@@ -308,21 +308,21 @@ namespace klee {
     class Results: public XML {
     private:
       std::vector<Issue> m_issues;
-      // std::vector<Failure> m_failures;
-      // std::vector<Info> m_infos;
+      std::vector<Failure> m_failures;
+      std::vector<Info> m_infos;
     public:
-      Results(const std::vector<Issue>& issues);
-      // Results(const std::vector<Issue>& issues,
-      // 	      const std::vector<Failure>& failures =
-      // 	      std::vector<Failure>(),
-      // 	      const std::vector<Info>& infos =
-      // 	      std::vector<Info>());
-      // Results(const std::vector<Failure>& failures);
-      // Results(const std::vector<Info>& infos);
+      Results();
+      Results(const std::vector<Issue>& issues,
+              const std::vector<Failure>& failures =
+              std::vector<Failure>(),
+              const std::vector<Info>& infos =
+              std::vector<Info>());
+      Results(const std::vector<Failure>& failures);
+      Results(const std::vector<Info>& infos);
       Results(const Results& that);
       const std::vector<Issue>& getIssues() const;
-      // const std::vector<Failure>& getFailures() const;
-      // const std::vector<Info>& getInfos() const;
+      const std::vector<Failure>& getFailures() const;
+      const std::vector<Info>& getInfos() const;
       bool operator ==(const Results& that) const;
       const std::string toXML() const;
     };

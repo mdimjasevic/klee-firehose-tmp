@@ -114,9 +114,15 @@ namespace {
   std::vector<Issue> results1Vec;
   std::vector<Issue> results2Vec(1, issue1);
   std::vector<Issue> results3Vec(constructResults3Vec());
+  std::vector<Failure> failureVec(1, failure1);
+  std::vector<Info> infoVec(1, info7);
+  
   Results results1(results1Vec);
   Results results2(results2Vec);
   Results results3(results3Vec);
+  Results results4(failureVec);
+  Results results5(infoVec);
+  Results results6(results3Vec, failureVec, infoVec);
   
   Generator gen1("klee", "1.2.0");
   Generator gen2("clanganalyzer", "n/a");
@@ -759,6 +765,8 @@ namespace {
   TEST(ResultsTest, constructor1) {
     EXPECT_EQ(results1Vec, results1.getIssues());
     EXPECT_EQ(0, results1.getIssues().size());
+    EXPECT_EQ(0, results1.getFailures().size());
+    EXPECT_EQ(0, results1.getInfos().size());
     ASSERT_FALSE(results1 == results2);
   }
 
@@ -766,6 +774,8 @@ namespace {
     EXPECT_EQ(results2Vec, results2.getIssues());
     EXPECT_EQ(1, results2.getIssues().size());
     EXPECT_EQ(issue1, results2.getIssues()[0]);
+    EXPECT_EQ(0, results2.getFailures().size());
+    EXPECT_EQ(0, results2.getInfos().size());
     ASSERT_FALSE(results3 == results2);
   }
 
@@ -775,38 +785,98 @@ namespace {
     EXPECT_EQ(issue1, results3.getIssues()[0]);
     EXPECT_EQ(issue2, results3.getIssues()[1]);
     EXPECT_EQ(issue3, results3.getIssues()[2]);
+    EXPECT_EQ(0, results3.getFailures().size());
+    EXPECT_EQ(0, results3.getInfos().size());
     ASSERT_FALSE(results1 == results3);
+  }
+
+  TEST(ResultsTest, constructor4) {
+    EXPECT_EQ(0, results4.getIssues().size());
+    EXPECT_EQ(0, results4.getInfos().size());
+    EXPECT_EQ(1, results4.getFailures().size());
+    EXPECT_EQ(failure1, results4.getFailures()[0]);
+    ASSERT_FALSE(results4 == results5);
+  }
+
+  TEST(ResultsTest, constructor5) {
+    EXPECT_EQ(0, results5.getIssues().size());
+    EXPECT_EQ(1, results5.getInfos().size());
+    EXPECT_EQ(0, results5.getFailures().size());
+    EXPECT_EQ(info7, results5.getInfos()[0]);
+    ASSERT_FALSE(results4 == results6);
+  }
+
+  TEST(ResultsTest, constructor6) {
+    EXPECT_EQ(3, results6.getIssues().size());
+    EXPECT_EQ(1, results6.getFailures().size());
+    EXPECT_EQ(1, results6.getInfos().size());
+    EXPECT_EQ(issue1, results6.getIssues()[0]);
+    EXPECT_EQ(issue2, results6.getIssues()[1]);
+    EXPECT_EQ(issue3, results6.getIssues()[2]);
+    EXPECT_EQ(failure1, results6.getFailures()[0]);
+    EXPECT_EQ(info7, results6.getInfos()[0]);
+    ASSERT_FALSE(results5 == results6);
+    ASSERT_FALSE(results3 == results6);
   }
 
   TEST(ResultsTest, copyConstructor1) {
     Results a(results1);
     EXPECT_EQ(a, results1);
   }
-  
+
   TEST(ResultsTest, copyConstructor2) {
     Results b(results2);
     EXPECT_EQ(b, results2);
   }
-  
+
   TEST(ResultsTest, copyConstructor3) {
     Results c(results3);
     EXPECT_EQ(c, results3);
   }
-  
+
   TEST(ResultsTest, copyConstructor4) {
+    Results d(results4);
+    EXPECT_EQ(d, results4);
+  }
+
+  TEST(ResultsTest, copyConstructor5) {
+    Results e(results5);
+    EXPECT_EQ(e, results5);
+  }
+
+  TEST(ResultsTest, copyConstructor6) {
+    Results f(results6);
+    EXPECT_EQ(f, results6);
+  }
+
+  TEST(ResultsTest, copyConstructor7) {
     Results dr(dummyResults());
     EXPECT_EQ(dr, dummyResults());
   }
 
   const std::string resultsToXML(const Results& results) {
     std::ostringstream os;
-    std::vector<Issue> v = results.getIssues();
+    const std::vector<Failure> failures = results.getFailures();
+    const std::vector<Issue> issues = results.getIssues();
+    const std::vector<Info> infos = results.getInfos();
     
     os << "<results>\n";
-    for (std::vector<Issue>::iterator iter = v.begin();
-	 iter != v.end();
+
+    for (std::vector<Failure>::const_iterator iter = failures.begin();
+	 iter != failures.end();
 	 ++iter)
       os << iter->toXML() + "\n";
+
+    for (std::vector<Issue>::const_iterator iter = issues.begin();
+	 iter != issues.end();
+	 ++iter)
+      os << iter->toXML() + "\n";
+
+    for (std::vector<Info>::const_iterator iter = infos.begin();
+	 iter != infos.end();
+	 ++iter)
+      os << iter->toXML() + "\n";
+
     os << "</results>";
     return os.str();
   }
@@ -815,9 +885,15 @@ namespace {
     std::string xml1 = results1.toXML();
     std::string xml2 = results2.toXML();
     std::string xml3 = results3.toXML();
+    std::string xml4 = results4.toXML();
+    std::string xml5 = results5.toXML();
+    std::string xml6 = results6.toXML();
     EXPECT_EQ("<results>\n</results>", xml1);
     EXPECT_EQ(xml2, resultsToXML(results2));
     EXPECT_EQ(xml3, resultsToXML(results3));
+    EXPECT_EQ(xml4, resultsToXML(results4));
+    EXPECT_EQ(xml5, resultsToXML(results5));
+    EXPECT_EQ(xml6, resultsToXML(results6));
   }
   
   TEST(ResultsTestDummy, states) {
@@ -926,6 +1002,7 @@ namespace {
     EXPECT_EQ(metadata1, analysis1.getMetadata());
     EXPECT_EQ(results1, analysis1.getResults());
     ASSERT_FALSE(analysis1 == analysis2);
+    ASSERT_FALSE(analysis1 == dummyAnalysis());
   }
   
   TEST(AnalysisTest, constructor2) {
