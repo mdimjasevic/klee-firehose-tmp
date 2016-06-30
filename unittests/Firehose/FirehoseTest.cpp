@@ -69,37 +69,37 @@ namespace {
   Issue issue2(msg1, loc1, trace1);
   Issue issue3(msg2, loc2, trace3);
 
-  // Message failure1Msg(std::string("unable to load symbol(") +
-  // 		      std::string("_ZN4dcpp4Text13systemCharsetE) while ") +
-  // 		      std::string("initializing globals."));
-  // Message failure2Msg("failed external call: ajStrNew");
-  // Location failure2Loc(File(std::string("/tmp/buildd/embassy-domsearch-") +
-  // 			    std::string("0.1.650/src/seqfraggle.c")),
-  // 		       dummyFunction,
-  // 		       Point(0, 119));
-  // Failure failure1(std::string("symbol-loading"), failure1Msg, dummyLocation);
-  // Failure failure2(std::string("external-call"), failure2Msg, failure2Loc);
+  Message failure1Msg(std::string("unable to load symbol(") +
+  		      std::string("_ZN4dcpp4Text13systemCharsetE) while ") +
+  		      std::string("initializing globals."));
+  Message failure2Msg("failed external call: ajStrNew");
+  Location failure2Loc(File(std::string("/tmp/buildd/embassy-domsearch-") +
+  			    std::string("0.1.650/src/seqfraggle.c")),
+  		       dummyFunction(),
+  		       Point(0, 119));
+  Failure failure1(std::string("symbol-loading"), failure1Msg, dummyLocation());
+  Failure failure2(std::string("external-call"), failure2Msg, failure2Loc);
 
-  // Message info1Msg("WARNING: undefined reference to function: _ZN4QUrlD1Ev");
-  // Message info2Msg("WARNING ONCE: function \"socket\" has inline asm");
-  // Message info3Msg("calling external: ev_default_loop(0)");
-  // Message info4Msg("undefined reference to variable: acs_map");
-  // Message info5Msg("calling __user_main with extra arguments.");
-  // Message info6Msg("Large alloc: 13113808 bytes.  KLEE may run out of memory.");
-  // Message info7Msg("__syscall_rt_sigaction: silently ignoring");
-  // Message info8Msg("execve: ignoring (EACCES)");
-  // Message info9Msg("executable has module level assembly (ignoring)");
-  // Message info10Msg("unable to write output test case, losing it");
-  // Info info1(std::string("undefined-function-reference"), info1Msg);
-  // info info2(std::string("inline-asm"), info2Msg);
-  // Info info3(std::string("calling-external"), info3Msg);
-  // Info info4(std::string("undefined-variable-reference"), info4Msg);
-  // Info info5(std::string("calling-user-main"), info5Msg);
-  // Info info6(std::string("large-alloc"), info6Msg);
-  // Info info7(std::string("silently-ignoring"), info7Msg);
-  // Info info8(std::string("execve"), info8Msg);
-  // Info info9(std::string("module-level-assembly"), info9Msg);
-  // Info info10(std::string("other-info"), info10Msg);
+  Message info1Msg("WARNING: undefined reference to function: _ZN4QUrlD1Ev");
+  Message info2Msg("WARNING ONCE: function \"socket\" has inline asm");
+  Message info3Msg("calling external: ev_default_loop(0)");
+  Message info4Msg("undefined reference to variable: acs_map");
+  Message info5Msg("calling __user_main with extra arguments.");
+  Message info6Msg("Large alloc: 13113808 bytes.  KLEE may run out of memory.");
+  Message info7Msg("__syscall_rt_sigaction: silently ignoring");
+  Message info8Msg("execve: ignoring (EACCES)");
+  Message info9Msg("executable has module level assembly (ignoring)");
+  Message info10Msg("unable to write output test case, losing it");
+  Info info1(std::string("undefined-function-reference"), info1Msg);
+  Info info2(std::string("inline-asm"), info2Msg);
+  Info info3(std::string("calling-external"), info3Msg);
+  Info info4(std::string("undefined-variable-reference"), info4Msg);
+  Info info5(std::string("calling-user-main"), info5Msg);
+  Info info6(std::string("large-alloc"), info6Msg);
+  Info info7(std::string("silently-ignoring"), info7Msg);
+  Info info8(std::string("execve"), info8Msg);
+  Info info9(std::string("module-level-assembly"), info9Msg);
+  Info info10(std::string("other-info"), info10Msg);
   
   // The ugliness of C++ < 11 - No easy way to construct a complex
   // persistent data structure
@@ -168,8 +168,8 @@ namespace {
   }
 
   TEST(PointTest, copyConstructor3) {
-    Point d(dummyPoint);
-    EXPECT_EQ(d, dummyPoint);
+    Point d(dummyPoint());
+    EXPECT_EQ(d, dummyPoint());
   }
 
   TEST(PointTest, toXML) {
@@ -178,7 +178,7 @@ namespace {
   }
 
   TEST(PointTestDummy, toXML) {
-    std::string xml = dummyPoint.toXML();
+    std::string xml = dummyPoint().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -186,7 +186,7 @@ namespace {
   TEST(RangeTest, constructor) {
     EXPECT_EQ(r.getP1(), Point(5, 6));
     EXPECT_EQ(r.getP2(), Point(10, 12));
-    ASSERT_FALSE(r == dummyRange);
+    ASSERT_FALSE(r == dummyRange());
   }
 
   TEST(RangeTest, copyConstructor1) {
@@ -195,8 +195,8 @@ namespace {
   }
 
   TEST(RangeTest, copyConstructor2) {
-    Range dr(dummyRange);
-    EXPECT_EQ(dr, dummyRange);
+    Range dr(dummyRange());
+    EXPECT_EQ(dr, dummyRange());
   }
 
   TEST(RangeTest, toXML) {
@@ -209,7 +209,7 @@ namespace {
   }
 
   TEST(RangeTestDummy, toXML) {
-    std::string xml = dummyRange.toXML();
+    std::string xml = dummyRange().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -232,8 +232,8 @@ namespace {
   }
 
   TEST(FileTest, copyConstructor3) {
-    File df(dummyFile);
-    EXPECT_EQ(df, dummyFile);
+    File df(dummyFile());
+    EXPECT_EQ(df, dummyFile());
   }
 
   TEST(FileTest, toXML) {
@@ -242,7 +242,7 @@ namespace {
   }
 
   TEST(FileTestDummy, toXML) {
-    std::string xml = dummyFile.toXML();
+    std::string xml = dummyFile().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -270,8 +270,8 @@ namespace {
   }
 
   TEST(FunctionTest, copyConstructor3) {
-    Function df(dummyFunction);
-    EXPECT_EQ(df, dummyFunction);
+    Function df(dummyFunction());
+    EXPECT_EQ(df, dummyFunction());
   }
 
   TEST(FunctionTest, toXML) {
@@ -280,7 +280,7 @@ namespace {
   }
 
   TEST(FunctionTestDummy, toXML) {
-    std::string xml = dummyFunction.toXML();
+    std::string xml = dummyFunction().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -290,14 +290,14 @@ namespace {
     EXPECT_EQ(File("a/b/c"), loc1.getFile());
     EXPECT_EQ(Function("f1"), loc1.getFunction());
     EXPECT_EQ(Range(Point(120, 0), Point(150, 0)), loc1.getRange());
-    EXPECT_EQ(dummyPoint, loc1.getPoint());
+    EXPECT_EQ(dummyPoint(), loc1.getPoint());
     ASSERT_FALSE(loc1 == loc2);
   }
 
   TEST(LocationTest, constructor2) {
     EXPECT_EQ(File("t.c"), loc2.getFile());
     EXPECT_EQ(Function("error"), loc2.getFunction());
-    EXPECT_EQ(dummyRange, loc2.getRange());
+    EXPECT_EQ(dummyRange(), loc2.getRange());
     EXPECT_EQ(Point(42, 3), loc2.getPoint());
     ASSERT_FALSE(loc3 == loc2);
   }
@@ -305,8 +305,8 @@ namespace {
   TEST(LocationTest, constructor3) {
     EXPECT_EQ(File("Test.c"), loc3.getFile());
     EXPECT_EQ(Function("Test1"), loc3.getFunction());
-    EXPECT_EQ(dummyRange, loc3.getRange());
-    EXPECT_EQ(dummyPoint, loc3.getPoint());
+    EXPECT_EQ(dummyRange(), loc3.getRange());
+    EXPECT_EQ(dummyPoint(), loc3.getPoint());
     ASSERT_FALSE(loc1 == loc3);
   }
   
@@ -326,8 +326,8 @@ namespace {
   }
 
   TEST(LocationTest, copyConstructor4) {
-    Location dl(dummyLocation);
-    EXPECT_EQ(dl, dummyLocation);
+    Location dl(dummyLocation());
+    EXPECT_EQ(dl, dummyLocation());
   }
 
   TEST(LocationTest, toXML1) {
@@ -360,7 +360,7 @@ namespace {
   }
 
   TEST(LocationTestDummy, toXML) {
-    std::string xml = dummyLocation.toXML();
+    std::string xml = dummyLocation().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -382,8 +382,8 @@ namespace {
   }
 
   TEST(MessageTest, copyConstructor3) {
-    Message dm(dummyMessage);
-    EXPECT_EQ(dm, dummyMessage);
+    Message dm(dummyMessage());
+    EXPECT_EQ(dm, dummyMessage());
   }
 
   const std::string messageToXML(const Message& msg) {
@@ -398,7 +398,7 @@ namespace {
   }
 
   TEST(MessageTestDummy, toXML) {
-    EXPECT_EQ("", dummyMessage.toXML());
+    EXPECT_EQ("", dummyMessage().toXML());
   }
 
   
@@ -422,8 +422,8 @@ namespace {
   }
 
   TEST(NotesTest, copyConstructor3) {
-    Notes dm(dummyNotes);
-    EXPECT_EQ(dm, dummyNotes);
+    Notes dm(dummyNotes());
+    EXPECT_EQ(dm, dummyNotes());
   }
 
   const std::string notesToXML(const Notes& notes) {
@@ -438,20 +438,20 @@ namespace {
   }
 
   TEST(NotesTestDummy, toXML) {
-    EXPECT_EQ("", dummyNotes.toXML());
+    EXPECT_EQ("", dummyNotes().toXML());
   }
 
   
   // State
   TEST(StateTest, constructor1) {
     EXPECT_EQ(loc1, state1.getLocation());
-    EXPECT_EQ(dummyNotes, state1.getNotes());
+    EXPECT_EQ(dummyNotes(), state1.getNotes());
     ASSERT_FALSE(state1 == state2);
   }
 
   TEST(StateTest, constructor2) {
     EXPECT_EQ(loc2, state2.getLocation());
-    EXPECT_EQ(dummyNotes, state2.getNotes());
+    EXPECT_EQ(dummyNotes(), state2.getNotes());
     ASSERT_FALSE(state3 == state2);
   }
 
@@ -477,15 +477,15 @@ namespace {
   }
 
   TEST(StateTest, copyConstructor4) {
-    State ds(dummyState);
-    EXPECT_EQ(ds, dummyState);
+    State ds(dummyState());
+    EXPECT_EQ(ds, dummyState());
   }
 
   const std::string stateToXML(const State& s) {
     std::ostringstream os;
 
     os << "<state>\n" << s.getLocation().toXML() + "\n";
-    if (!(s.getNotes() == dummyNotes))
+    if (!(s.getNotes() == dummyNotes()))
       os << s.getNotes().toXML() + "\n";
     os << "</state>";
 
@@ -502,7 +502,7 @@ namespace {
   }
 
   TEST(StateTestDummy, toXML) {
-    std::string xml = dummyState.toXML();
+    std::string xml = dummyState().toXML();
     EXPECT_EQ("", xml);
   }
 
@@ -540,8 +540,8 @@ namespace {
   }
 
   TEST(TraceTest, copyConstructor4) {
-    Trace dt(dummyTrace);
-    EXPECT_EQ(dt, dummyTrace);
+    Trace dt(dummyTrace());
+    EXPECT_EQ(dt, dummyTrace());
   }
 
   const std::string traceToXML(const Trace& t) {
@@ -567,17 +567,17 @@ namespace {
   }
 
   TEST(TraceTestDummy, states) {
-    std::vector<State> vStates(dummyTrace.getStates());
+    std::vector<State> vStates(dummyTrace().getStates());
     EXPECT_EQ(1, vStates.size());
-    EXPECT_EQ(dummyState, vStates[0]);
+    EXPECT_EQ(dummyState(), vStates[0]);
   }
 
   TEST(TraceTestDummy, identity) {
-    ASSERT_TRUE(dummyTrace == dummyTrace);
+    ASSERT_TRUE(dummyTrace() == dummyTrace());
   }
   
   TEST(TraceTestDummy, toXML) {
-    ASSERT_EQ("", dummyTrace.toXML());
+    ASSERT_EQ("", dummyTrace().toXML());
   }
 
 
@@ -585,7 +585,7 @@ namespace {
   TEST(IssueTest, constructor1) {
     EXPECT_EQ(msg1, issue1.getMessage());
     EXPECT_EQ(loc1, issue1.getLocation());
-    EXPECT_EQ(dummyTrace, issue1.getTrace());
+    EXPECT_EQ(dummyTrace(), issue1.getTrace());
   }
 
   TEST(IssueTest, constructor2) {
@@ -616,8 +616,8 @@ namespace {
   }
 
   TEST(IssueTest, copyConstructor4) {
-    Issue di(dummyIssue);
-    EXPECT_EQ(di, dummyIssue);
+    Issue di(dummyIssue());
+    EXPECT_EQ(di, dummyIssue());
   }
 
   const std::string issueToXML(const Issue& issue) {
@@ -625,7 +625,7 @@ namespace {
     os << "<issue>\n";
     os << issue.getMessage().toXML() + "\n";
     os << issue.getLocation().toXML() + "\n";
-    if (!(issue.getTrace() == dummyTrace))
+    if (!(issue.getTrace() == dummyTrace()))
       os << issue.getTrace().toXML() + "\n";
     os << "</issue>";
 
@@ -642,87 +642,97 @@ namespace {
   }
 
   TEST(IssueTestDummy, toXML) {
-    EXPECT_EQ("", dummyIssue.toXML());
+    EXPECT_EQ("", dummyIssue().toXML());
   }
 
 
   // Failure
-  // TEST(FailureTest, constructor1) {
-  //   EXPECT_EQ(std::string("symbol-loading"), failure1.getId());
-  //   EXPECT_EQ(failure1Msg, failure1.getMessage());
-  //   EXPECT_EQ(dummyLocation, failure1.getLocation());
-  //   ASSERT_FALSE(failure1 == failure2);
-  // }
+  TEST(FailureTest, constructor1) {
+    EXPECT_EQ(std::string("symbol-loading"), failure1.getId());
+    EXPECT_EQ(failure1Msg, failure1.getMessage());
+    EXPECT_EQ(dummyLocation(), failure1.getLocation());
+    ASSERT_FALSE(failure1 == failure2);
+  }
 
-  // TEST(FailureTest, constructor2) {
-  //   EXPECT_EQ(std::string("external-call"), failure2.getId());
-  //   EXPECT_EQ(failure2Msg, failure2.getMessage());
-  //   EXPECT_EQ(failure2Loc, failure2.getLocation());
-  // }
+  TEST(FailureTest, constructor2) {
+    EXPECT_EQ(std::string("external-call"), failure2.getId());
+    EXPECT_EQ(failure2Msg, failure2.getMessage());
+    EXPECT_EQ(failure2Loc, failure2.getLocation());
+  }
 
-  // TEST(FailureTest, copyConstructor1) {
-  //   Failure a(failure1);
-  //   EXPECT_EQ(a, failure1);
-  // }
+  TEST(FailureTest, copyConstructor1) {
+    Failure a(failure1);
+    EXPECT_EQ(a, failure1);
+  }
   
-  // TEST(FailureTest, copyConstructor2) {
-  //   Failure b(failure2);
-  //   EXPECT_EQ(b, failure2);
-  // }
+  TEST(FailureTest, copyConstructor2) {
+    Failure b(failure2);
+    EXPECT_EQ(b, failure2);
+  }
   
-  // TEST(FailureTest, copyConstructor3) {
-  //   Failure df(dummyFailure);
-  //   EXPECT_EQ(df, dummyFailure);
-  // }
+  TEST(FailureTest, copyConstructor3) {
+    Failure df(dummyFailure());
+    EXPECT_EQ(df, dummyFailure());
+  }
   
-  // const std::string failureToXML(const Failure& failure) {
-  //   std::stringstream ss;
+  const std::string failureToXML(const Failure& failure) {
+    std::stringstream ss;
 
-  //   ss << "<failure failure-id=\"" + failure.getId() + "\">\n";
-  //   if (!(failure.getLocation() == dummyLocation))
-  //     ss << failure.getLocation().toXML() + "\n";
-  //   ss << failure.getMessage().toXML() + "\n";
-  //   ss << "</failure>";
+    ss << "<failure failure-id=\"" + failure.getId() + "\">\n";
+    if (!(failure.getLocation() == dummyLocation()))
+      ss << failure.getLocation().toXML() + "\n";
+    ss << failure.getMessage().toXML() + "\n";
+    ss << "</failure>";
 
-  //   return ss.str();
-  // }
+    return ss.str();
+  }
 
-  // TEST(FailureTest, toXML) {
-  //   std::string xml1 = failure1.toXML();
-  //   std::string xml2 = failure2.toXML();
-  //   EXPECT_EQ(xml1, failureToXML(failure1));
-  //   EXPECT_EQ(xml2, failureToXML(failure2));
-  // }
+  TEST(FailureTest, toXML) {
+    std::string xml1 = failure1.toXML();
+    std::string xml2 = failure2.toXML();
+    EXPECT_EQ(xml1, failureToXML(failure1));
+    EXPECT_EQ(xml2, failureToXML(failure2));
+  }
 
-  // TEST(FailureTestDummy, toXML) {
-  //   EXPECT_EQ("", dummyFailure.toXML());
-  // }
+  TEST(FailureTestDummy, toXML) {
+    EXPECT_EQ("", dummyFailure().toXML());
+  }
   
 
   // Info
   TEST(InfoTest, constructor) {
-    // EXPECT_EQ(info1Msg, info1.getMessage());
-    // EXPECT_EQ(info2Msg, info2.getMessage());
-    // EXPECT_EQ(info3Msg, info3.getMessage());
-    // EXPECT_EQ(info4Msg, info4.getMessage());
-    // EXPECT_EQ(info5Msg, info5.getMessage());
-    // EXPECT_EQ(info6Msg, info6.getMessage());
-    // EXPECT_EQ(info7Msg, info7.getMessage());
-    // EXPECT_EQ(info8Msg, info8.getMessage());
-    // EXPECT_EQ(info9Msg, info9.getMessage());
-    // EXPECT_EQ(info10Msg, info10.getMessage());
-    // EXPECT_EQ(std::string("undefined-function-reference"), info1.getId());
-    // EXPECT_EQ(std::string("inline-asm"), info2.getId());
-    // EXPECT_EQ(std::string("calling-external"), info3.getId());
-    // EXPECT_EQ(std::string("undefined-variable-reference"), info4.getId());
-    // EXPECT_EQ(std::string("calling-user-main"), info5.getId());
-    // EXPECT_EQ(std::string("large-alloc"), info6.getId());
-    // EXPECT_EQ(std::string("silently-ignoring"), info7.getId());
-    // EXPECT_EQ(std::string("execve"), info8.getId());
-    // EXPECT_EQ(std::string("module-level-assembly"), info9.getId());
-    // EXPECT_EQ(std::string("other-info"), info10.getId());
+    EXPECT_EQ(info1Msg, info1.getMessage());
+    EXPECT_EQ(info2Msg, info2.getMessage());
+    EXPECT_EQ(info3Msg, info3.getMessage());
+    EXPECT_EQ(info4Msg, info4.getMessage());
+    EXPECT_EQ(info5Msg, info5.getMessage());
+    EXPECT_EQ(info6Msg, info6.getMessage());
+    EXPECT_EQ(info7Msg, info7.getMessage());
+    EXPECT_EQ(info8Msg, info8.getMessage());
+    EXPECT_EQ(info9Msg, info9.getMessage());
+    EXPECT_EQ(info10Msg, info10.getMessage());
+    EXPECT_EQ(std::string("undefined-function-reference"), info1.getId());
+    EXPECT_EQ(std::string("inline-asm"), info2.getId());
+    EXPECT_EQ(std::string("calling-external"), info3.getId());
+    EXPECT_EQ(std::string("undefined-variable-reference"), info4.getId());
+    EXPECT_EQ(std::string("calling-user-main"), info5.getId());
+    EXPECT_EQ(std::string("large-alloc"), info6.getId());
+    EXPECT_EQ(std::string("silently-ignoring"), info7.getId());
+    EXPECT_EQ(std::string("execve"), info8.getId());
+    EXPECT_EQ(std::string("module-level-assembly"), info9.getId());
+    EXPECT_EQ(std::string("other-info"), info10.getId());
   }
 
+  TEST(InfoTest, copyConstructor) {
+    Info a(info1);
+    Info b(info2);
+    Info c(info8);
+    Info d(dummyInfo());
+    EXPECT_EQ(a, info1);
+    EXPECT_EQ(b, info2);
+    EXPECT_EQ(c, info8);
+    EXPECT_EQ(d, dummyInfo());
+  }
   
 
   // Results
@@ -764,8 +774,8 @@ namespace {
   }
   
   TEST(ResultsTest, copyConstructor4) {
-    Results dr(dummyResults);
-    EXPECT_EQ(dr, dummyResults);
+    Results dr(dummyResults());
+    EXPECT_EQ(dr, dummyResults());
   }
 
   const std::string resultsToXML(const Results& results) {
@@ -791,17 +801,17 @@ namespace {
   }
   
   TEST(ResultsTestDummy, states) {
-    std::vector<Issue> vIssues(dummyResults.getIssues());
+    std::vector<Issue> vIssues(dummyResults().getIssues());
     EXPECT_EQ(1, vIssues.size());
-    EXPECT_EQ(dummyIssue, vIssues[0]);
+    EXPECT_EQ(dummyIssue(), vIssues[0]);
   }
 
   TEST(ResultsTestDummy, identity) {
-    ASSERT_TRUE(dummyResults == dummyResults);
+    ASSERT_TRUE(dummyResults() == dummyResults());
   }
   
   TEST(ResultsTestDummy, toXML) {
-    ASSERT_EQ("", dummyResults.toXML());
+    ASSERT_EQ("", dummyResults().toXML());
   }
 
 
@@ -815,7 +825,7 @@ namespace {
   TEST(GeneratorTest, constructor2) {
     EXPECT_EQ("clanganalyzer", gen2.getName());
     EXPECT_EQ("n/a", gen2.getVersion());
-    ASSERT_FALSE(gen2 == dummyGenerator);
+    ASSERT_FALSE(gen2 == dummyGenerator());
   }
 
   TEST(GeneratorTest, copyConstructor1) {
@@ -829,8 +839,8 @@ namespace {
   }
 
   TEST(GeneratorTest, copyConstructor3) {
-    Generator dg(dummyGenerator);
-    EXPECT_EQ(dg, dummyGenerator);
+    Generator dg(dummyGenerator());
+    EXPECT_EQ(dg, dummyGenerator());
   }
 
   TEST(GeneratorTest, toXML) {
@@ -841,7 +851,7 @@ namespace {
   }
 
   TEST(GeneratorTestDummy, toXML) {
-    EXPECT_EQ("", dummyGenerator.toXML());
+    EXPECT_EQ("", dummyGenerator().toXML());
   }
 
 
@@ -864,8 +874,8 @@ namespace {
   }
   
   TEST(MetadataTest, copyConstructor3) {
-    Metadata dm(dummyMetadata);
-    EXPECT_EQ(dm, dummyMetadata);
+    Metadata dm(dummyMetadata());
+    EXPECT_EQ(dm, dummyMetadata());
   }
 
   const std::string metadataToXML(const Metadata& metadata) {
@@ -887,7 +897,7 @@ namespace {
   }
 
   TEST(MetadataTestDummy, toXML) {
-    EXPECT_EQ("", dummyMetadata.toXML());
+    EXPECT_EQ("", dummyMetadata().toXML());
   }
 
 
@@ -926,8 +936,8 @@ namespace {
   }
   
   TEST(AnalysisTest, copyConstructor4) {
-    Analysis da(dummyAnalysis);
-    EXPECT_EQ(da, dummyAnalysis);
+    Analysis da(dummyAnalysis());
+    EXPECT_EQ(da, dummyAnalysis());
   }
 
   const std::string analysisToXML(const Analysis& analysis) {
@@ -951,6 +961,6 @@ namespace {
   }
 
   TEST(AnalysisTestDummy, toXML) {
-    EXPECT_EQ("", dummyAnalysis.toXML());
+    EXPECT_EQ("", dummyAnalysis().toXML());
   }  
 }

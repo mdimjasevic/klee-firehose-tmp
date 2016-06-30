@@ -26,8 +26,6 @@ namespace klee {
   namespace firehose {
 
     template <typename T> std::string NumberToString(T Number);
-    // Dummy string value used for default reference parameter values
-    static const std::string dummyString("");
 
     class XML {
     protected:
@@ -52,7 +50,10 @@ namespace klee {
     };
 
     // Dummy point value
-    static const Point dummyPoint(0, 0);
+    static Point& dummyPoint() {
+      static Point dummy(0, 0);
+      return dummy;
+    }
 
     
     class Range: public XML {
@@ -68,7 +69,10 @@ namespace klee {
     };
 
     // Dummy range value
-    static const Range dummyRange(dummyPoint, dummyPoint);
+    static Range& dummyRange() {
+      static Range dummy(dummyPoint(), dummyPoint());
+      return dummy;
+    }
 
     
     // <stats wall-clock-time="5"/>
@@ -88,7 +92,10 @@ namespace klee {
     };
 
     // Dummy file value
-    static const File dummyFile(dummyString);
+    static File& dummyFile() {
+      static File dummy("");
+      return dummy;
+    }
 
     
     class Function: public XML {
@@ -104,7 +111,10 @@ namespace klee {
     };
 
     // Dummy function value
-    static const Function dummyFunction(dummyString);
+    static Function& dummyFunction() {
+      static Function dummy("");
+      return dummy;
+    }
     
 
     class Location: public XML {
@@ -115,7 +125,7 @@ namespace klee {
       Point m_point;
     public:
       Location(const File& file, const Function& function,
-	       const Range& range = dummyRange);
+	       const Range& range = dummyRange());
       Location(const File& file, const Function& function, const Point& point);
       Location(const Location& that);
       const File& getFile() const;
@@ -127,7 +137,10 @@ namespace klee {
     };
 
     //Dummy location value
-    static const Location dummyLocation(dummyFile, dummyFunction, dummyRange);
+    static Location& dummyLocation() {
+      static Location dummy(dummyFile(), dummyFunction(), dummyRange());
+      return dummy;
+    }
 
     
     // An abstract class that is inherited by Message and Notes
@@ -150,7 +163,10 @@ namespace klee {
     };
 
     // Dummy message value
-    static const Message dummyMessage(dummyString);
+    static Message& dummyMessage() {
+      static Message dummy(std::string(""));
+      return dummy;
+    }
 
 
     class Notes: public Text {
@@ -163,7 +179,10 @@ namespace klee {
     };
     
     // Dummy notes value
-    static const Notes dummyNotes(dummyString);
+    static Notes& dummyNotes() {
+      static Notes dummy(std::string(""));
+      return dummy;
+    }
 
 
     class State: public XML {
@@ -171,7 +190,7 @@ namespace klee {
       Location m_location;
       Notes m_notes;
     public:
-      State(const Location& location, const Notes& notes = dummyNotes);
+      State(const Location& location, const Notes& notes = dummyNotes());
       State(const State& that);
       const Location& getLocation() const;
       const Notes& getNotes() const;
@@ -180,7 +199,10 @@ namespace klee {
     };
 
     // Dummy location value
-    static const State dummyState(dummyLocation, dummyNotes);
+    static State& dummyState() {
+      static State dummy(dummyLocation(), dummyNotes());
+      return dummy;
+    }
     
 
     class Trace: public XML {
@@ -195,7 +217,10 @@ namespace klee {
     };
 
     // Dummy trace value
-    static const Trace dummyTrace(std::vector<State>(1, dummyState));
+    static Trace& dummyTrace() {
+      static Trace dummy(std::vector<State>(1, dummyState()));
+      return dummy;
+    }
 
 
     class ResultType: public XML {
@@ -212,7 +237,7 @@ namespace klee {
       Trace m_trace;
     public:
       Issue(const Message& message, const Location& location,
-	    const Trace& trace = dummyTrace);
+	    const Trace& trace = dummyTrace());
       Issue(const Issue& that);
       const Message& getMessage() const;
       const Location& getLocation() const;
@@ -222,7 +247,10 @@ namespace klee {
     };
 
     // Dummy issue value
-    static const Issue dummyIssue(dummyMessage, dummyLocation, dummyTrace);
+    static Issue& dummyIssue() {
+      static Issue dummy(dummyMessage(), dummyLocation(), dummyTrace());
+      return dummy;
+    }
 
 
     // Dimjašević: This is not a good design, but I do not want to
@@ -237,7 +265,7 @@ namespace klee {
       // "symbol-loading" and "external-call"
       FailureOrInfo(const std::string& id,
 		    const Message& message,
-		    const Location& location = dummyLocation);
+		    const Location& location = dummyLocation());
       const std::string& getId() const;
       const Message& getMessage() const;
     };
@@ -248,7 +276,7 @@ namespace klee {
       // the only two values you should pass as 'id' are
       // "symbol-loading" and "external-call"
       Failure(const std::string& id, const Message& message,
-	      const Location& location = dummyLocation);
+	      const Location& location = dummyLocation());
       Failure(const Failure& that);
       const Location& getLocation() const;
       bool operator==(const Failure& that) const;
@@ -256,8 +284,10 @@ namespace klee {
     };
 
     // Dummy failure value
-    static const Failure dummyFailure(dummyString, dummyMessage,
-				      dummyLocation);
+    static Failure& dummyFailure() {
+      static Failure dummy(std::string(""), dummyMessage(), dummyLocation());
+      return dummy;
+    }
 
 
     class Info: public FailureOrInfo {
@@ -269,7 +299,10 @@ namespace klee {
     };
 
     // Dummy info value
-    static const Info dummyInfo(dummyString, dummyMessage);
+    static Info& dummyInfo() {
+      static Info dummy(std::string(""), dummyMessage());
+      return dummy;
+    }
     
 
     class Results: public XML {
@@ -294,7 +327,10 @@ namespace klee {
       const std::string toXML() const;
     };
 
-    static const Results dummyResults(std::vector<Issue>(1, dummyIssue));
+    static Results& dummyResults() {
+      static Results dummy(std::vector<Issue>(1, dummyIssue()));
+      return dummy;
+    }
     
 
     class Generator: public XML {
@@ -311,7 +347,10 @@ namespace klee {
     };
 
     // Dummy generator value
-    static const Generator dummyGenerator(dummyString, dummyString);
+    static Generator& dummyGenerator() {
+      static Generator dummy(std::string(""), std::string(""));
+      return dummy;
+    }
 
 
     class SUT: public XML {
@@ -341,7 +380,10 @@ namespace klee {
     };
 
     // Dummy metadata value
-    static const Metadata dummyMetadata(dummyGenerator);
+    static Metadata& dummyMetadata() {
+      static Metadata dummy(dummyGenerator());
+      return dummy;
+    }
 
     
     class Analysis: public XML {
@@ -358,7 +400,10 @@ namespace klee {
     };
 
     // Dummy analysis value
-    static const Analysis dummyAnalysis(dummyMetadata, dummyResults);
+    static Analysis& dummyAnalysis() {
+      static Analysis dummy(dummyMetadata(), dummyResults());
+      return dummy;
+    }
   }
 }
 
