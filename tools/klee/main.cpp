@@ -11,7 +11,7 @@
 
 #include "klee/ExecutionState.h"
 #include "klee/Expr.h"
-// #include "klee/Firehose.h"
+#include "klee/Firehose.h"
 #include "klee/Interpreter.h"
 #include "klee/Statistics.h"
 #include "klee/Config/Version.h"
@@ -98,9 +98,9 @@ namespace {
   NoOutput("no-output",
            cl::desc("Don't generate test files"));
 
-  // cl::opt<bool>
-  // FirehoseOutput("firehose-output",
-  //                cl::desc("Output results in the Firehose format"));
+  cl::opt<bool>
+  FirehoseOutput("firehose-output",
+                 cl::desc("Output results in the Firehose format"));
 
   cl::opt<bool>
   WarnAllExternals("warn-all-externals",
@@ -246,8 +246,6 @@ private:
   int m_argc;
   char **m_argv;
 
-  // 
-
   const std::string programArgumentsToString() const;
 
 public:
@@ -355,6 +353,21 @@ KleeHandler::KleeHandler(int argc, char **argv)
   if ((klee_message_file = fopen(file_path.c_str(), "w")) == NULL)
     klee_error("cannot open file \"%s\": %s", file_path.c_str(), strerror(errno));
 
+  if (FirehoseOutput) {
+    // open firehose.xml
+    std::string firehose_file_path = getOutputFilename("firehose.xml");
+    if ((klee_firehose_file = fopen(firehose_file_path.c_str(), "w")) == NULL)
+      klee_error("cannot open file \"%s\": %s", firehose_file_path.c_str(),
+		 strerror(errno));
+    // write opening tags for top-level XML elements
+    fprintf(klee_firehose_file, "<analysis>\n");
+    fprintf(klee_firehose_file, "<metadata>\n");
+    fprintf(klee_firehose_file, "<generator name=\"%s\" version=\"%s\"/>\n",
+	    PACKAGE_NAME, PACKAGE_VERSION);
+    fprintf(klee_firehose_file, "</metadata>\n");
+    fprintf(klee_firehose_file, "<results>\n");
+  }
+  
   // open info
   m_infoFile = openOutputFile("info");
 }
@@ -364,6 +377,12 @@ KleeHandler::~KleeHandler() {
   if (m_symPathWriter) delete m_symPathWriter;
   fclose(klee_warning_file);
   fclose(klee_message_file);
+  if (klee_firehose_file) {
+    // write closing tags and close the file
+    fprintf(klee_firehose_file, "</results>\n");
+    fprintf(klee_firehose_file, "</analysis>\n");
+    fclose(klee_firehose_file);
+  }
   delete m_infoFile;
 }
  
@@ -492,25 +511,23 @@ void KleeHandler::processTestCase(const ExecutionState &state,
       delete f;
     }
 
-    // if (FirehoseOutput) {
-    //   if (errorMessage) {
-    // 	char errorType[256];
-    // 	std::istringstream iss(errorMessage);
-    // 	iss.getline(errorType, 256);
-	
-    // 	firehose::Message msg(std::string(errorType) + "\n" +
-    // 			      "The error occurs when the " +
-    // 			      "program is executed with the following " +
-    // 			      "arguments: " +
-    // 			      programArgumentsToString() + "\n");
-    // 	firehose::Trace trace(state.dumpStackInFirehose());
-    // 	firehose::Issue issue(msg, firehose::dummyLocation, trace);
-    // 	llvm::raw_ostream *f = openTestFile("xml", id);
-    // 	*f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << "\n"
-    // 	   << issue.toXML() << "\n";
-    // 	delete f;
-    //   }
-    // }
+    if (FirehoseOutput && errorMessage) {
+      char errorType[256];
+      std::istringstream iss(errorMessage);
+      iss.getline(errorType, 256);
+      std::string progArgs = programArgumentsToString();
+      firehose::Message msg(std::string(errorType) + ".\n" +
+			    "The error occurs when the program is " +
+			    "executed with " +
+			    (progArgs == "" ?
+			     "no argument." :
+			     "the following arguments: " + progArgs) +
+			    "\n");
+      firehose::Trace trace(state.dumpStackInFirehose());
+      firehose::Location loc((*(trace.getStates().rbegin())).getLocation());
+      firehose::Issue issue(msg, loc, trace);
+      fprintf(klee_firehose_file, "%s\n", issue.toXML().c_str());
+    }
     
     if (m_pathWriter) {
       std::vector<unsigned char> concreteBranches;

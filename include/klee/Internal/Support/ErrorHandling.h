@@ -18,10 +18,13 @@
 
 #include <stdio.h>
 
+#include <string>
+
 namespace klee {
 
 extern FILE *klee_warning_file;
 extern FILE *klee_message_file;
+extern FILE *klee_firehose_file;
 
 /// Print "KLEE: ERROR" followed by the msg in printf format and a
 /// newline on stderr and to warnings.txt, then exit with an error.
@@ -46,6 +49,10 @@ void klee_warning(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 /// printed once for each unique (id, msg) pair (as pointers).
 void klee_warning_once(const void *id, const char *msg, ...)
     __attribute__((format(printf, 2, 3)));
+
+/// Returns an id attribute for the Firehose failure or info elements
+/// corresponding to a message
+std::string determineFirehoseFailureInfoId(const char *whole_msg);
 }
 
 #endif /* __KLEE_ERROR_HANDLING_H__ */

@@ -7,6 +7,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "klee/Firehose.h"
 #include "klee/Internal/Support/ErrorHandling.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/raw_ostream.h"
@@ -19,10 +20,13 @@
 
 #include <set>
 
+#define NELEMS(array) (sizeof(array)/sizeof(array[0]))
+
 using namespace klee;
 
 FILE *klee::klee_warning_file = NULL;
 FILE *klee::klee_message_file = NULL;
+FILE *klee::klee_firehose_file = NULL;
 
 static const char *warningPrefix = "WARNING";
 static const char *warningOncePrefix = "WARNING ONCE";
@@ -93,11 +97,59 @@ static void klee_vfmessage(FILE *fp, const char *pfx, const char *msg,
   fdos.flush();
 }
 
+// Firehose-specific function for determining an id attribute of the
+// Firehose failure or info elements
+std::string determineFirehoseFailureInfoId(char *whole_msg) {
+
+  static const char *message[] = {
+    // infos
+    "undefined reference to function",
+    "undefined reference to variable",
+    "calling external",
+    "calling __user_main with extra arguments",
+    "Large alloc",
+    "execve",
+    "executable has module level assembly",
+    // failures
+    "unable to load symbol",
+    "failed external call"
+  };
+
+  static const char *id[] = {
+    // infos
+    "undefined-function-reference",
+    "undefined-variable-reference",
+    "calling-external",
+    "calling-user-main",
+    "large-alloc",
+    "execve",
+    "module-level-assembly",
+    // failures
+    "symbol-loading",
+    "external-call"
+  };
+
+  assert(NELEMS(message) == NELEMS(id));
+
+  for (unsigned i = 0; i < NELEMS(message); ++i)
+  if (!strncmp(whole_msg, message[i], strlen(message[i])))
+    return std::string(id[i]);
+
+  if (strstr(whole_msg, "has inline asm"))
+    return std::string("inline-asm");
+  else if (strstr(whole_msg, "silently ignoring"))
+    return std::string("silently-ignoring");
+  else
+    return std::string("other");
+}
+
 /* Prints a message/warning.
 
    If pfx is NULL, this is a regular message, and it's sent to
    klee_message_file (messages.txt).  Otherwise, it is sent to
    klee_warning_file (warnings.txt).
+   Finally, if Firehose output is enabled, a warning message is
+   sent to klee_firehose_file (firehose.xml).
 
    Iff onlyToFile is false, the message is also printed on stderr.
 */
@@ -110,7 +162,28 @@ static void klee_vmessage(const char *pfx, bool onlyToFile, const char *msg,
     va_end(ap2);
   }
 
-  klee_vfmessage(pfx ? klee_warning_file : klee_message_file, pfx, msg, ap);
+  va_list ap2;
+  va_copy(ap2, ap);
+  klee_vfmessage(pfx ? klee_warning_file : klee_message_file, pfx, msg, ap2);
+  va_end(ap2);
+
+  // Firehose
+  if (pfx && klee_firehose_file) {
+    char buf[512];
+    vsprintf(buf, msg, ap);
+    std::string elementId = determineFirehoseFailureInfoId(buf);
+    // depending on the content of pfx, we need firehose::Info or
+    // firehose::Failure
+    if (!strncmp(pfx, "WARNING", strlen("WARNING")) ||
+	!strcmp(pfx, notePrefix)) {
+      firehose::Info info(elementId, std::string(buf));
+      fprintf(klee_firehose_file, "%s\n", info.toXML().c_str());
+    }
+    else if(!strcmp(pfx, errorPrefix)) {
+      firehose::Failure failure(elementId, std::string(buf));
+      fprintf(klee_firehose_file, "%s\n", failure.toXML().c_str());
+    }
+  }
 }
 
 void klee::klee_message(const char *msg, ...) {
@@ -128,11 +201,21 @@ void klee::klee_message_to_file(const char *msg, ...) {
   va_end(ap);
 }
 
+static void close_firehose_file() {
+  if (klee_firehose_file) {
+    // write closing tags and close the file
+    fprintf(klee_firehose_file, "</results>\n");
+    fprintf(klee_firehose_file, "</analysis>\n");
+    fclose(klee_firehose_file);
+  }
+}
+
 void klee::klee_error(const char *msg, ...) {
   va_list ap;
   va_start(ap, msg);
   klee_vmessage(errorPrefix, false, msg, ap);
   va_end(ap);
+  close_firehose_file();
   exit(1);
 }
 

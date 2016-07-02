@@ -27,6 +27,15 @@ namespace klee {
 
     template <typename T> std::string NumberToString(T Number);
 
+    class Info;
+    static Info& dummyInfo() __attribute__ ((unused));
+
+    class Failure;
+    static Failure& dummyFailure() __attribute__ ((unused));
+
+    class Analysis;
+    static Analysis& dummyAnalysis() __attribute__ ((unused));
+    
     class XML {
     protected:
       const std::string mkString(std::vector<std::string>& ss,
