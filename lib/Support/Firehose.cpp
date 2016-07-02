@@ -100,7 +100,7 @@ File::File(const char* path): m_path(path) {}
 
 const std::string& File::getPath() const { return this->m_path; }
 
-File::File(const File& that) { this->m_path = that.getPath(); }
+File::File(const File& that): m_path(that.getPath()) {}
 
 bool File::operator ==(const File& that) const {
   return this->getPath() == that.getPath();
@@ -450,18 +450,14 @@ const std::string Generator::toXML() const {
 
 
 Metadata::Metadata(const Generator& generator): m_generator(generator) {}
-// : m_sut(sut)
 
 Metadata::Metadata(const Metadata& that): m_generator(that.getGenerator()) {}
-// : m_sut(that.getSUT())
 
 const Generator& Metadata::getGenerator() const { return this->m_generator; }
-// const SUT& Metadata::getSUT() const             { return this->m_sut; }
 
 bool Metadata::operator ==(const Metadata& that) const {
   return
     this->getGenerator() == that.getGenerator();
-  // && this->getSUT() == that.getSUT();
 }
 
 const std::string Metadata::toXML() const {
@@ -469,7 +465,6 @@ const std::string Metadata::toXML() const {
     std::vector<std::string> r;
     r.push_back("<metadata>");
     r.push_back(this->getGenerator().toXML());
-    // r.push_back(this->getSUT().toXML());
     r.push_back("</metadata>");
     return mkString(r);
   }

@@ -35,7 +35,8 @@ namespace klee {
 
     class Analysis;
     static Analysis& dummyAnalysis() __attribute__ ((unused));
-    
+
+
     class XML {
     protected:
       const std::string mkString(std::vector<std::string>& ss,
@@ -83,11 +84,7 @@ namespace klee {
       return dummy;
     }
 
-    
-    // <stats wall-clock-time="5"/>
-    // maybe <failure> that is anologous to issue
-      
-      
+
     class File: public XML {
     private:
       std::string m_path;
@@ -239,7 +236,6 @@ namespace klee {
 
     
     class Issue: public ResultType {
-    // class Issue: public XML {
     private:
       Message m_message;
       Location m_location;
@@ -270,8 +266,6 @@ namespace klee {
       Message m_message;
       Location m_location;
     public:
-      // the only two values you should pass as 'id' are
-      // "symbol-loading" and "external-call"
       FailureOrInfo(const std::string& id,
 		    const Message& message,
 		    const Location& location = dummyLocation());
@@ -282,7 +276,7 @@ namespace klee {
     
     class Failure: public FailureOrInfo {
     public:
-      // the only two values you should pass as 'id' are
+      // the only two values one should pass in for 'id' are
       // "symbol-loading" and "external-call"
       Failure(const std::string& id, const Message& message,
 	      const Location& location = dummyLocation());
@@ -362,28 +356,13 @@ namespace klee {
     }
 
 
-    class SUT: public XML {
-      // TODO: implement this class and add it to as a member of the
-      // Metadata class
-      // Ideally, it should have a <debian-source> tag, as illustrated at:
-      //
-      // https://github.com/fedora-static-analysis/firehose/blob/master/examples/example-debian-source.xml
-      //
-      // However, leave this to Debile, i.e. post-process the report
-      // obtained from KLEE in Debile.
-    };
-
-
     class Metadata: public XML {
     private:
       Generator m_generator;
-      // SUT m_sut;
     public:
       Metadata(const Generator& generator);
-      // Metadata(const Generator& generator, const SUT& sut);
       Metadata(const Metadata& that);
       const Generator& getGenerator() const;
-      // const SUT& getSUT() const;
       bool operator ==(const Metadata& that) const;
       const std::string toXML() const;
     };
