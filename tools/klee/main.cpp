@@ -65,6 +65,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include <cctype>
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
@@ -246,7 +247,10 @@ private:
   int m_argc;
   char **m_argv;
 
-  const std::string programArgumentsToString() const;
+  const std::pair<bool, std::string>
+    programArgumentsToString(bool success,
+			     const std::vector< std::pair<std::string,
+			     std::vector<unsigned char> > >& args) const;
 
 public:
   KleeHandler(int argc, char **argv);
@@ -386,19 +390,49 @@ KleeHandler::~KleeHandler() {
   delete m_infoFile;
 }
  
-const std::string KleeHandler::programArgumentsToString() const {
-  std::string r("");
+const std::pair<bool, std::string>
+  KleeHandler::programArgumentsToString(bool success,
+					const std::vector< std::pair<
+					std::string,
+					std::vector<unsigned char> > >& args)
+  const {
 
-  // Skip the program name, i.e. start from argument #1
-  unsigned start = 1;
-  for (unsigned i = start; i < (unsigned) m_argc; ++i) {
-    std::string s(m_argv[i]);
-    if (s[0]=='A' && s[1] && !s[2]) s[1] = '\0';
-    if (i > start + 1) r += " ";
-    r += s;
+  if (!success) return std::make_pair(false, "");
+
+  return std::make_pair(true, "TODO");
+
+  // TODO: Fix the implementation below as it is not working when one
+  // single symbolic argument is present. Also, see how it would
+  // behave when there are multiple arguments (both concrete and
+  // symbolic)
+  
+  std::ostringstream ss;
+
+  for (unsigned i = 0; i < args.size(); ++i) {
+    char value[1024];
+    // std::string value;
+    strcpy(value, "");
+    if (i > 0) ss << " ";
+    fprintf(stderr, "args[%d].first == %s\n", i, args[i].first.c_str());
+    if (args[i].first == "model_version")
+      strcpy(value, m_argv[i + 1]);
+      // value = std::string(m_argv[i + 1]);
+    else {
+      // value = std::string(args[i].second.begin(), args[i].second.end());
+      for (unsigned j = 0; j < args[i].second.size(); ++j)
+	value[j] = args[i].second[j];
+      value[args[i].second.size()] = '\0';
+    }
+    // for (unsigned j = 0; j < value.length(); ++j) {
+    for (unsigned j = 0; j < strlen(value); ++j) {
+      if (!value[j]) continue;
+      fprintf(stderr, "%d-th char = %d\n", j, value[j]);
+      if (!isprint(value[j])) return std::make_pair(false, "");
+    }
+    ss << value;
   }
 
-  return r;
+  return std::make_pair(true, ss.str());
 }
  
 void KleeHandler::setInterpreter(Interpreter *i) {
@@ -515,18 +549,35 @@ void KleeHandler::processTestCase(const ExecutionState &state,
       char errorType[256];
       std::istringstream iss(errorMessage);
       iss.getline(errorType, 256);
-      std::string progArgs = programArgumentsToString();
-      firehose::Message msg(std::string(errorType) + ".\n" +
-			    "The error occurs when the program is " +
-			    "executed with " +
-			    (progArgs == "" ?
-			     "no argument." :
-			     "the following arguments: " + progArgs) +
-			    "\n");
+
+      std::ostringstream msgSs;
+      msgSs << errorType;
+      std::pair<bool, std::string> posixProgArgs;
+      posixProgArgs = programArgumentsToString(success, out);
+
+      if (success) {
+	if (posixProgArgs.first) {
+	  msgSs << ".\n The error occurs when " << m_argv[0]
+		<< " is executed with ";
+	  if (posixProgArgs.second == "")
+	    msgSs << "no argument.";
+	  else
+	    msgSs << "the following arguments: " << posixProgArgs.second;
+	}
+	else
+	  msgSs << ".\n The arguments to " << m_argv[0] << " that lead "
+		<< "to the error are not printable. Replay a test case "
+		<< "that leads to the error by using the klee-replay "
+		<< "tool on the corresponding .ktest file from the output "
+		<< "directory.";
+      }
+
+      firehose::Message msg(msgSs.str());
       firehose::Trace trace(state.dumpStackInFirehose());
       firehose::Location loc((*(trace.getStates().rbegin())).getLocation());
       firehose::Issue issue(msg, loc, trace);
       fprintf(klee_firehose_file, "%s\n", issue.toXML().c_str());
+      fflush(klee_firehose_file);
     }
     
     if (m_pathWriter) {

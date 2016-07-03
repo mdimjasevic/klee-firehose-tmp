@@ -136,9 +136,14 @@ std::string determineFirehoseFailureInfoId(char *whole_msg) {
     return std::string(id[i]);
 
   if (strstr(whole_msg, "has inline asm"))
+    // info
     return std::string("inline-asm");
   else if (strstr(whole_msg, "silently ignoring"))
+    // info
     return std::string("silently-ignoring");
+  else if (strstr(whole_msg, "when main() has less than two arguments"))
+    // failure
+    return std::string("posix-runtime");
   else
     return std::string("other");
 }
@@ -183,6 +188,7 @@ static void klee_vmessage(const char *pfx, bool onlyToFile, const char *msg,
       firehose::Failure failure(elementId, std::string(buf));
       fprintf(klee_firehose_file, "%s\n", failure.toXML().c_str());
     }
+    fflush(klee_firehose_file);
   }
 }
 
